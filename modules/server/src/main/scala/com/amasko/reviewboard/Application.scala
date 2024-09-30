@@ -1,6 +1,6 @@
 package com.amasko.reviewboard
 
-import http.controllers.HealthController
+import http.HttpApi
 import zio.*
 import zio.http.Server
 import sttp.tapir.server.ziohttp.*
@@ -8,12 +8,12 @@ import sttp.tapir.server.ziohttp.*
 object Application extends ZIOAppDefault:
 
     private val serverProgram = for
-      controller <- HealthController.makeZIO
+      routes <- HttpApi.routesZIO
         _ <- Server.serve(
           ZioHttpInterpreter(
             ZioHttpServerOptions.default
           ).toHttp(
-            controller.health
+            routes
           )
         )
     yield ()
