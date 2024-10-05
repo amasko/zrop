@@ -1,5 +1,6 @@
 package com.amasko.reviewboard
 
+import com.amasko.reviewboard.services.CompanyService
 import http.HttpApi
 import zio.*
 import zio.http.Server
@@ -20,5 +21,6 @@ object Application extends ZIOAppDefault:
 
     override def run =
       serverProgram.provide(
-        Server.default
+        Server.default,
+        CompanyService.dummyLayer
       )
