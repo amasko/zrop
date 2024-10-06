@@ -13,6 +13,8 @@ import zio.json.*
 import zio.test.Assertion.*
 import sttp.client3.*
 import com.amasko.reviewboard.domain.data.Company
+import com.amasko.reviewboard.repositories.CompanyRepoMock
+import com.amasko.reviewboard.services.CompanyServiceLive
 import sttp.tapir.server.ServerEndpoint
 
 object CompanyControllerSpec extends ZIOSpecDefault {
@@ -42,6 +44,9 @@ object CompanyControllerSpec extends ZIOSpecDefault {
           body <- ZIO.from(response.body.map(_.fromJson[Company]))
         yield assertTrue(body == """{"id":1,"name":"Company Name","slug":"company-name","url":"nompanyname.com"}""".fromJson[Company])
       }
+    ).provide(
+      CompanyServiceLive.layer,
+      CompanyRepoMock.layer
     )
 
 }
