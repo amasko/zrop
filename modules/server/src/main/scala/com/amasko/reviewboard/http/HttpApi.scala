@@ -11,6 +11,7 @@ object HttpApi:
     for
       healthController <- HealthController.makeZIO
       companyController <- CompanyController.makeZIO
-    yield List(healthController, companyController)
+      reviewController <- ReviewController.makeZIO
+    yield List(healthController, companyController, reviewController)
 
   val routesZIO = makeControllers.map(gatherRouts)

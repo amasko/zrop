@@ -8,7 +8,7 @@ import endpoints.ReviewEndpoints
 
 import zio.*
 
-class ReviewController private (service: ReviewService) extends ReviewEndpoints:
+class ReviewController private (service: ReviewService) extends BaseController, ReviewEndpoints:
 
   val createReview = createEndpoint
     .serverLogicSuccess[Task](request =>
@@ -30,3 +30,9 @@ class ReviewController private (service: ReviewService) extends ReviewEndpoints:
     )
 
   val routes = List(createReview, getAllReviews, getReviewById)
+
+object ReviewController:
+    def makeZIO = 
+      for 
+        service <- ZIO.service[ReviewService]
+      yield new ReviewController(service)

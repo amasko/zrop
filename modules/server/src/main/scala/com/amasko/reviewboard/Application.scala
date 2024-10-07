@@ -1,7 +1,7 @@
 package com.amasko.reviewboard
 
-import com.amasko.reviewboard.repositories.CompanyRepoLive
-import com.amasko.reviewboard.services.CompanyServiceLive
+import repositories.{CompanyRepoLive, ReviewRepoLive}
+import services.{CompanyServiceLive, ReviewServiceLive}
 import http.HttpApi
 import io.getquill.SnakeCase
 import io.getquill.jdbczio.Quill
@@ -26,7 +26,9 @@ object Application extends ZIOAppDefault:
       serverProgram.provide(
         Server.default,
         CompanyServiceLive.layer,
+        ReviewServiceLive.layer,
         CompanyRepoLive.layer,
+        ReviewRepoLive.layer,
         Quill.Postgres.fromNamingStrategy(SnakeCase),
         Quill.DataSource.fromPrefix("zrop.db")
       )

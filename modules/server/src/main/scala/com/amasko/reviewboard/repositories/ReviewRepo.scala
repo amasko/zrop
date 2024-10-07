@@ -13,6 +13,8 @@ trait ReviewRepo:
   def update(id: Long, op: Review => Review): zio.Task[Review]
   def delete(id: Long): zio.Task[Review]
   def getById(id: Long): zio.Task[Option[Review]]
+  def getByUserId(userId: Long): zio.Task[Option[Review]]
+  def getByCompanyId(companyId: Long): zio.Task[Option[Review]]
   def getAll: zio.Task[List[Review]]
 //  def getByCompanyId(companyId: Long): zio.Task[List[Review]]
 
@@ -42,6 +44,12 @@ case class ReviewRepoLive(quill: Quill.Postgres[io.getquill.SnakeCase]) extends 
 
   override def getAll: zio.Task[List[Review]] =
     run(query[Review])
+
+  override def getByUserId(userId: Long): Task[Option[Review]] =
+    run(query[Review].filter(_.userId == lift(userId))).map(_.headOption)
+
+  override def getByCompanyId(companyId: Long): Task[Option[Review]] =
+    run(query[Review].filter(_.companyId == lift(companyId))).map(_.headOption)
 
 //  override def getByCompanyId(companyId: Long): zio.Task[List[Review]] =
 //    run(query[Review].filter(_.companyId == lift(companyId)))
