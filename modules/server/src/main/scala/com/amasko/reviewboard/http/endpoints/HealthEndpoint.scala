@@ -2,9 +2,9 @@ package com.amasko.reviewboard.http.endpoints
 
 import sttp.tapir.*
 
-trait HealthEndpoint:
+trait HealthEndpoint extends BaseEndpoint:
 
-  val healthEndpoint = endpoint.get
+  val healthEndpoint = baseEndpoint.get
     .in("health")
     .out(stringBody)
     .description("Health check endpoint")

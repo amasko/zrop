@@ -11,23 +11,27 @@ import zio.*
 class ReviewController private (service: ReviewService) extends BaseController, ReviewEndpoints:
 
   val createReview = createEndpoint
-    .serverLogicSuccess[Task](request =>
-      for
+    .serverLogic[Task] { request =>
+      val result = for
         now <- Clock.instant
         review = request.toReview(0L, now)
         created <- service.create(review)
       yield created
-    )
+      
+      result.either
+    }
 
   val getAllReviews = getAllEndpoint
-    .serverLogicSuccess[Task](_ => service.getReviews)
+    .serverLogic[Task](_ => service.getReviews.either)
 
   val getReviewById = getById
-    .serverLogicSuccess[Task](id =>
-      id.toLongOption match
+    .serverLogic[Task] { id =>
+      val result = id.toLongOption match
         case Some(id) => service.getReview(id)
-        case None     => ZIO.fail(new Exception("Invalid id"))
-    )
+        case None => ZIO.fail(new Exception("Invalid id"))
+        
+      result.either
+    }
 
   val routes = List(createReview, getAllReviews, getReviewById)
 
