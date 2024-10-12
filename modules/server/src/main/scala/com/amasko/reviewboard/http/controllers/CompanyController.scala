@@ -13,8 +13,9 @@ class CompanyController private (service: CompanyService)
     extends BaseController
     with CompanyEndpoints:
 
-  val createCompany: Full[Unit, Unit, CreateCompanyRequest, Throwable, Company, Any, Task] = createEndpoint
-    .serverLogic[Task](request => service.create(request.toCompany(0L)).either)
+  val createCompany: Full[Unit, Unit, CreateCompanyRequest, Throwable, Company, Any, Task] =
+    createEndpoint
+      .serverLogic[Task](request => service.create(request.toCompany(0L)).either)
 
   val getAllCompanies = getAllEndpoint
     .serverLogic[Task](_ => service.getCompanies.either)

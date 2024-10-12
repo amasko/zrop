@@ -11,8 +11,8 @@ trait UserRepo:
   def findUserByEmail(email: String): Task[Option[User]]
   def findUserById(id: Long): Task[Option[User]]
   def createUser(user: User): Task[User]
-  def updateUser(user: User, op: User => User): Task[User]
-  def deleteUser(user: User): Task[User]
+  def updateUser(id: Long, op: User => User): Task[User]
+  def deleteUser(id: Long): Task[User]
 
 case class UserRepoLive(quill: Quill.Postgres[io.getquill.SnakeCase]) extends UserRepo:
 
@@ -33,16 +33,16 @@ case class UserRepoLive(quill: Quill.Postgres[io.getquill.SnakeCase]) extends Us
       query[User].insertValue(lift(user)).returningGenerated(_.id)
     ).map(id => user.copy(id = id))
 
-  override def updateUser(user: User, op: User => User): Task[User] =
+  override def updateUser(id: Long, op: User => User): Task[User] =
     for
-      user <- findUserById(user.id).someOrFail(new RuntimeException("User not found"))
+      user <- findUserById(id).someOrFail(new RuntimeException("User not found"))
       updated <- run(
         query[User].filter(_.id == lift(user.id)).updateValue(lift(op(user))).returning(a => a)
       )
     yield updated
 
-  override def deleteUser(user: User): Task[User] =
-    run(query[User].filter(_.id == lift(user.id)).delete.returning(r => r))
+  override def deleteUser(id: Long): Task[User] =
+    run(query[User].filter(_.id == lift(id)).delete.returning(r => r))
 
 end UserRepoLive
 

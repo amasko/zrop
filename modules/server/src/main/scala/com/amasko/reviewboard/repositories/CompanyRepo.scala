@@ -23,13 +23,14 @@ class CompanyRepoLive(quill: Quill.Postgres[SnakeCase]) extends CompanyRepo:
 
   override def create(c: Company): Task[Company] = run(
     query[Company].insertValue(lift(c)).returningGenerated(_.id)
-  ).map(id => c.copy(id = id)
-  )
+  ).map(id => c.copy(id = id))
 
   override def update(id: Long, op: Company => Company): Task[Company] =
     for
       company <- getById(id).someOrFail(new RuntimeException("Company not found"))
-      updated <- run(query[Company].filter(_.id == lift(id)).updateValue(lift(op(company))).returning(a => a))
+      updated <- run(
+        query[Company].filter(_.id == lift(id)).updateValue(lift(op(company))).returning(a => a)
+      )
     yield updated
 
   override def delete(id: Long): Task[Company] =
@@ -45,7 +46,6 @@ class CompanyRepoLive(quill: Quill.Postgres[SnakeCase]) extends CompanyRepo:
   override def getBySlug(slug: String): Task[Option[Company]] =
     run(query[Company].filter(_.slug == lift(slug))).map(_.headOption)
 
-
 object CompanyRepoLive:
   val layer = ZLayer.fromFunction((pg: Quill.Postgres[SnakeCase]) => CompanyRepoLive(pg))
 
@@ -53,9 +53,9 @@ object RepoDemo extends ZIOAppDefault:
 
   val program = for
     repo <- ZIO.service[CompanyRepo]
-    _ <- repo.create(Company(0L, "slug", "name", "url", None, None))
-    c <- repo.getAll
-    _ <- ZIO.logInfo(c.mkString(", "))
+    _    <- repo.create(Company(0L, "slug", "name", "url", None, None))
+    c    <- repo.getAll
+    _    <- ZIO.logInfo(c.mkString(", "))
   yield ()
 
   override def run =
@@ -65,4 +65,3 @@ object RepoDemo extends ZIOAppDefault:
         Quill.Postgres.fromNamingStrategy(SnakeCase),
         Quill.DataSource.fromPrefix("zrop.db")
       )
-

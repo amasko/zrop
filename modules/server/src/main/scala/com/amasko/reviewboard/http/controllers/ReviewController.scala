@@ -17,7 +17,7 @@ class ReviewController private (service: ReviewService) extends BaseController, 
         review = request.toReview(0L, now)
         created <- service.create(review)
       yield created
-      
+
       result.either
     }
 
@@ -28,15 +28,14 @@ class ReviewController private (service: ReviewService) extends BaseController, 
     .serverLogic[Task] { id =>
       val result = id.toLongOption match
         case Some(id) => service.getReview(id)
-        case None => ZIO.fail(new Exception("Invalid id"))
-        
+        case None     => ZIO.fail(new Exception("Invalid id"))
+
       result.either
     }
 
   val routes = List(createReview, getAllReviews, getReviewById)
 
 object ReviewController:
-    def makeZIO = 
-      for 
-        service <- ZIO.service[ReviewService]
-      yield new ReviewController(service)
+  def makeZIO =
+    for service <- ZIO.service[ReviewService]
+    yield new ReviewController(service)

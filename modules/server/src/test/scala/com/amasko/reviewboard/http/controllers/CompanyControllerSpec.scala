@@ -20,7 +20,7 @@ import sttp.tapir.server.ServerEndpoint
 object CompanyControllerSpec extends ZIOSpecDefault {
 
   given MonadError[Task] = new RIOMonadError[Any]
-  
+
   def backend(fn: CompanyController => ServerEndpoint[Any, Task]) =
     for
       companyController <- CompanyController.makeZIO
@@ -37,12 +37,16 @@ object CompanyControllerSpec extends ZIOSpecDefault {
       test("should create a company") {
         for
           b <- backend(_.createCompany)
-          response <- basicRequest.post(uri"/companies")
+          response <- basicRequest
+            .post(uri"/companies")
             .body(CreateCompanyRequest("Company Name", "nompanyname.com", None, None).toJson)
 //            .response(asJson[CreateCompanyRequest])
             .send(b)
           body <- ZIO.from(response.body.map(_.fromJson[Company]))
-        yield assertTrue(body == """{"id":1,"name":"Company Name","slug":"company-name","url":"nompanyname.com"}""".fromJson[Company])
+        yield assertTrue(
+          body == """{"id":1,"name":"Company Name","slug":"company-name","url":"nompanyname.com"}"""
+            .fromJson[Company]
+        )
       }
     ).provide(
       CompanyServiceLive.layer,

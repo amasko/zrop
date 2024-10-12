@@ -18,7 +18,6 @@ trait ReviewRepo:
   def getAll: zio.Task[List[Review]]
 //  def getByCompanyId(companyId: Long): zio.Task[List[Review]]
 
-
 case class ReviewRepoLive(quill: Quill.Postgres[io.getquill.SnakeCase]) extends ReviewRepo:
   import quill.*
   inline given SchemaMeta[Review] = schemaMeta[Review]("reviews")
@@ -27,13 +26,14 @@ case class ReviewRepoLive(quill: Quill.Postgres[io.getquill.SnakeCase]) extends 
 
   override def create(r: Review): zio.Task[Review] = run(
     query[Review].insertValue(lift(r)).returningGenerated(_.id)
-  ).map(id => r.copy(id = id)
-  )
+  ).map(id => r.copy(id = id))
 
   override def update(id: Long, op: Review => Review): zio.Task[Review] =
     for
       review <- getById(id).someOrFail(new RuntimeException("Review not found"))
-      updated <- run(query[Review].filter(_.id == lift(id)).updateValue(lift(op(review))).returning(a => a))
+      updated <- run(
+        query[Review].filter(_.id == lift(id)).updateValue(lift(op(review))).returning(a => a)
+      )
     yield updated
 
   override def delete(id: Long): zio.Task[Review] =
@@ -53,7 +53,6 @@ case class ReviewRepoLive(quill: Quill.Postgres[io.getquill.SnakeCase]) extends 
 
 //  override def getByCompanyId(companyId: Long): zio.Task[List[Review]] =
 //    run(query[Review].filter(_.companyId == lift(companyId)))
-  
 
 object ReviewRepoLive:
   val layer = ZLayer.fromFunction((pg: Quill.Postgres[SnakeCase]) => ReviewRepoLive(pg))

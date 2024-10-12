@@ -10,7 +10,8 @@ import sttp.tapir.generic.auto.*
 
 trait CompanyEndpoints extends BaseEndpoint:
   val createEndpoint =
-    baseEndpoint.tag("companies")
+    baseEndpoint
+      .tag("companies")
       .name("create")
       .description("create a listing for a company")
       .in("companies")
@@ -19,7 +20,8 @@ trait CompanyEndpoints extends BaseEndpoint:
       .out(jsonBody[Company])
 
   val getAllEndpoint =
-    baseEndpoint.tag("companies")
+    baseEndpoint
+      .tag("companies")
       .name("getAll")
       .description("get all companies")
       .in("companies")
@@ -27,7 +29,8 @@ trait CompanyEndpoints extends BaseEndpoint:
       .out(jsonBody[List[Company]])
 
   val getById =
-    baseEndpoint.tag("companies")
+    baseEndpoint
+      .tag("companies")
       .name("getById")
       .description("get a company by id")
       .in("companies" / path[String]("id"))

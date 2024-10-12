@@ -7,14 +7,14 @@ import domain.data.Review
 import java.time.Instant
 
 case class CreateReviewRequest(
-                              companyId: Long,
-                              userId: Long,
-  management: Int,
-  culture: Int,
-  salary: Int,
-  benefits: Int,
-  wouldRecommend: Int,
-  review: String
+    companyId: Long,
+    userId: Long,
+    management: Int,
+    culture: Int,
+    salary: Int,
+    benefits: Int,
+    wouldRecommend: Int,
+    review: String
 ):
   def toReview(id: Long, i: Instant): Review =
     Review(
@@ -31,9 +31,6 @@ case class CreateReviewRequest(
       i
     )
 
-
 object CreateReviewRequest:
   import zio.json.{DeriveJsonCodec, JsonCodec}
   given JsonCodec[CreateReviewRequest] = DeriveJsonCodec.gen[CreateReviewRequest]
-  
-  
