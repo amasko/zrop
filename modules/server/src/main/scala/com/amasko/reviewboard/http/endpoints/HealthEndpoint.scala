@@ -1,4 +1,6 @@
-package com.amasko.reviewboard.http.endpoints
+package com.amasko.reviewboard
+package http
+package endpoints
 
 import sttp.tapir.*
 

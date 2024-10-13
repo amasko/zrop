@@ -8,7 +8,7 @@ import endpoints.ReviewEndpoints
 
 import zio.*
 
-class ReviewController private (service: ReviewService) extends BaseController, ReviewEndpoints:
+class ReviewController private (service: ReviewService) extends BaseController with ReviewEndpoints:
 
   val createReview = createEndpoint
     .serverLogic[Task] { request =>

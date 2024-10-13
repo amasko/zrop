@@ -1,6 +1,8 @@
-package com.amasko.reviewboard.http.requests
+package com.amasko.reviewboard
+package http
+package requests
 
-import com.amasko.reviewboard.domain.data.Company
+import domain.data.Company
 
 final case class CreateCompanyRequest(
     name: String,

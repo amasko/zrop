@@ -2,8 +2,9 @@ package com.amasko.reviewboard
 package services
 
 import zio.*
-import domain.data.User
+import domain.data.{User, UserToken}
 import repositories.UserRepo
+import domain.errors.NotFoundException
 
 import java.security.SecureRandom
 import javax.crypto.spec.PBEKeySpec
@@ -14,6 +15,7 @@ trait UserService:
   def verifyPassword(email: String, passwd: String): Task[User]
   def updatePassword(email: String, oldPassword: String, newPassword: String): Task[User]
   def deleteUser(email: String, passwd: String): Task[User]
+  def generateToken(email: String, passwd: String): Task[UserToken]
 
 case class UserServiceLive(userRepo: UserRepo, jwt: JWTService) extends UserService:
   import UserServiceLive.Hasher
@@ -26,16 +28,16 @@ case class UserServiceLive(userRepo: UserRepo, jwt: JWTService) extends UserServ
   override def verifyPassword(email: String, passwd: String): Task[User] =
     userRepo
       .findUserByEmail(email)
-      .someOrFail(new RuntimeException(s"User with email ${email} not found"))
+      .someOrFail(NotFoundException(s"User with email ${email} not found"))
       .flatMap(user =>
-        if Hasher.validateHash(passwd, user.hashedPasswd) then ZIO.succeed(user)
+        if Hasher.validateHash(passwd, user.hashedPassword) then ZIO.succeed(user)
         else ZIO.fail(new IllegalArgumentException("Invalid password"))
       )
 
   override def updatePassword(email: String, oldPassword: String, newPassword: String): Task[User] =
     for
       user    <- verifyPassword(email, oldPassword)
-      updated <- userRepo.updateUser(user.id, _.copy(hashedPasswd = Hasher.hashGen(newPassword)))
+      updated <- userRepo.updateUser(user.id, _.copy(hashedPassword = Hasher.hashGen(newPassword)))
     yield updated
 
   override def deleteUser(email: String, passwd: String): Task[User] =
@@ -43,6 +45,12 @@ case class UserServiceLive(userRepo: UserRepo, jwt: JWTService) extends UserServ
       user    <- verifyPassword(email, passwd)
       deleted <- userRepo.deleteUser(user.id)
     yield deleted
+  
+  override def generateToken(email: String, passwd: String): Task[UserToken] =
+    for 
+        user <- verifyPassword(email, passwd)
+        token <- jwt.createToken(user)
+    yield token
 
 end UserServiceLive
 

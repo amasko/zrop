@@ -1,3 +1,4 @@
+import sbt.{file, project}
 
 ThisBuild / version      := "0.1.0-SNAPSHOT"
 ThisBuild / scalaVersion := "3.5.0"
@@ -47,6 +48,8 @@ val dependencies = Seq(
   "com.stripe"                     % "stripe-java"                       % stripeVersion
 )
 
+val Cctt: String = "compile->compile;test->test"
+
 lazy val foundations = (project in file("modules/foundations"))
   .settings(
     libraryDependencies ++= dependencies
@@ -62,10 +65,20 @@ lazy val server = (project in file("modules/server"))
     libraryDependencies ++= dependencies
   )
 
+lazy val integration = (project in file("modules/integration"))
+  .settings(
+//    name := "integration",
+//    settings,
+    libraryDependencies ++= dependencies,
+    Test / fork    := true,
+    testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework"))
+  )
+  .dependsOn(server % Cctt)
+
 
 lazy val root = (project in file("."))
   .settings(
     name := "zrop"
   )
-  .aggregate(foundations, server)
-  .dependsOn(foundations, server)
+  .aggregate(foundations, server, integration)
+  .dependsOn(foundations, server, integration)

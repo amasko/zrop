@@ -49,19 +49,19 @@ class CompanyRepoLive(quill: Quill.Postgres[SnakeCase]) extends CompanyRepo:
 object CompanyRepoLive:
   val layer = ZLayer.fromFunction((pg: Quill.Postgres[SnakeCase]) => CompanyRepoLive(pg))
 
-object RepoDemo extends ZIOAppDefault:
-
-  val program = for
-    repo <- ZIO.service[CompanyRepo]
-    _    <- repo.create(Company(0L, "slug", "name", "url", None, None))
-    c    <- repo.getAll
-    _    <- ZIO.logInfo(c.mkString(", "))
-  yield ()
-
-  override def run =
-    program
-      .provide(
-        CompanyRepoLive.layer,
-        Quill.Postgres.fromNamingStrategy(SnakeCase),
-        Quill.DataSource.fromPrefix("zrop.db")
-      )
+//object RepoDemo extends ZIOAppDefault:
+//
+//  val program = for
+//    repo <- ZIO.service[CompanyRepo]
+//    _    <- repo.create(Company(0L, "slug", "name", "url", None, None))
+//    c    <- repo.getAll
+//    _    <- ZIO.logInfo(c.mkString(", "))
+//  yield ()
+//
+//  override def run =
+//    program
+//      .provide(
+//        CompanyRepoLive.layer,
+//        Quill.Postgres.fromNamingStrategy(SnakeCase),
+//        Quill.DataSource.fromPrefix("zrop.db")
+//      )
