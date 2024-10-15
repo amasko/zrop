@@ -53,12 +53,25 @@ case class UserController private (userService: UserService, jwt: JWTService)
           .either
     )
 
+  val forgotPassword = forgottenPasswordEndpoint.serverLogic[Task] { req =>
+    userService
+      .sendPasswordRecoveryToken(req.email)
+      .map(r => UserResponse(req.email))
+      .either
+  }
+
+  val recoverPassword = recoverPasswordEndpoint.serverLogic[Task] { req =>
+    userService
+      .recoverPassword(req.email, req.token, req.newPassword)
+      .map(r => UserResponse(req.email)) // todo throw Unauthorized here?
+      .either
+  }
+
   override val routes = List(createUser, login, deleteUser, updatePass)
 
-
 object UserController:
-  def makeZIO = 
+  def makeZIO =
     for
       users <- ZIO.service[UserService]
-      jwt <- ZIO.service[JWTService]
+      jwt   <- ZIO.service[JWTService]
     yield UserController(users, jwt)

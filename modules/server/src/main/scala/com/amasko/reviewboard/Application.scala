@@ -13,6 +13,10 @@ import io.getquill.jdbczio.Quill
 
 object Application extends ZIOAppDefault:
 
+  override val bootstrap: zio.ZLayer[ZIOAppArgs, Any, Any] = zio.Runtime
+    .setConfigProvider(zio.config.typesafe.TypesafeConfigProvider.fromResourcePath())
+//    ++ zio.Runtime.removeDefaultLoggers ++ SLF4J.slf4j
+
   private val serverProgram = for
     routes <- HttpApi.routesZIO
     _ <- Server.serve(
@@ -36,5 +40,7 @@ object Application extends ZIOAppDefault:
       Configs.layer,
       JWTServiceLive.layer,
       UserRepoLive.layer,
-      UserServiceLive.layer
+      UserServiceLive.layer,
+      EmailServiceLive.layer,
+      RecoveryTokensRepoLive.layer
     )

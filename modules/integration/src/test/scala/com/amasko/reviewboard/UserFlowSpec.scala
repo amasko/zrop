@@ -98,5 +98,7 @@ object UserFlowSpec extends ZIOSpecDefault:
       UserRepoLive.layer,
       JWTServiceLive.layer,
       PostgresTestContainer.dsLayer,
-      ZLayer.succeed(JWTConfig("secret", 3600))
+      ZLayer.succeed(JWTConfig("secret", 3600)),
+      EmailServiceLive.layer,
+      RecoveryTokensRepoLive.layer
     )

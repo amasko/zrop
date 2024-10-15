@@ -3,8 +3,9 @@ package services
 
 import zio.*
 import domain.data.{User, UserToken}
-import repositories.UserRepo
+import repositories.{RecoveryTokensRepo, UserRepo}
 import domain.errors.NotFoundException
+import domain.errors.UnauthorizedException
 
 import java.security.SecureRandom
 import javax.crypto.spec.PBEKeySpec
@@ -16,8 +17,15 @@ trait UserService:
   def updatePassword(email: String, oldPassword: String, newPassword: String): Task[User]
   def deleteUser(email: String, passwd: String): Task[User]
   def generateToken(email: String, passwd: String): Task[UserToken]
+  def sendPasswordRecoveryToken(email: String): Task[Unit]
+  def recoverPassword(email: String, token: String, newPassword: String): Task[Boolean]
 
-case class UserServiceLive(userRepo: UserRepo, jwt: JWTService) extends UserService:
+case class UserServiceLive(
+    userRepo: UserRepo,
+    jwt: JWTService,
+    emailService: EmailService,
+    tokenRepo: RecoveryTokensRepo
+) extends UserService:
   import UserServiceLive.Hasher
 
   override def registerUser(email: String, passwd: String): Task[User] =
@@ -25,13 +33,16 @@ case class UserServiceLive(userRepo: UserRepo, jwt: JWTService) extends UserServ
       User(-0L, email, Hasher.hashGen(passwd))
     )
 
-  override def verifyPassword(email: String, passwd: String): Task[User] =
+  private def findUserOrFail(email: String): Task[User] =
     userRepo
       .findUserByEmail(email)
       .someOrFail(NotFoundException(s"User with email ${email} not found"))
+
+  override def verifyPassword(email: String, passwd: String): Task[User] =
+    findUserOrFail(email)
       .flatMap(user =>
         if Hasher.validateHash(passwd, user.hashedPassword) then ZIO.succeed(user)
-        else ZIO.fail(new IllegalArgumentException("Invalid password"))
+        else ZIO.fail(UnauthorizedException)
       )
 
   override def updatePassword(email: String, oldPassword: String, newPassword: String): Task[User] =
@@ -45,12 +56,31 @@ case class UserServiceLive(userRepo: UserRepo, jwt: JWTService) extends UserServ
       user    <- verifyPassword(email, passwd)
       deleted <- userRepo.deleteUser(user.id)
     yield deleted
-  
+
   override def generateToken(email: String, passwd: String): Task[UserToken] =
-    for 
-        user <- verifyPassword(email, passwd)
-        token <- jwt.createToken(user)
+    for
+      user  <- verifyPassword(email, passwd)
+      token <- jwt.createToken(user)
     yield token
+
+  override def sendPasswordRecoveryToken(email: String): Task[Unit] =
+    for
+      user <- findUserOrFail(email)
+//      token <- tokenRepo.getRecoveryToken(email)  todo why?
+      token <- tokenRepo.createOrReplaceRecoveryToken(email)
+      _     <- emailService.sendRecoveryToken(email, token) // do not allow sending to many emails
+    yield ()
+
+  override def recoverPassword(email: String, token: String, newPassword: String): Task[Boolean] =
+    for
+      user  <- findUserOrFail(email)
+      valid <- tokenRepo.checkToken(email, token)
+      _ <-
+        if valid
+        then userRepo.updateUser(user.id, _.copy(hashedPassword = Hasher.hashGen(newPassword)))
+        else ZIO.fail(new IllegalArgumentException("Invalid token"))
+      _ <- tokenRepo.deleteRecoveryToken(email)
+    yield valid
 
 end UserServiceLive
 
