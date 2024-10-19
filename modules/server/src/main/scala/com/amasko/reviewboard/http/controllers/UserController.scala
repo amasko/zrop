@@ -67,7 +67,7 @@ case class UserController private (userService: UserService, jwt: JWTService)
       .either
   }
 
-  override val routes = List(createUser, login, deleteUser, updatePass)
+  override val routes = List(createUser, login, deleteUser, updatePass, recoverPassword, forgotPassword)
 
 object UserController:
   def makeZIO =

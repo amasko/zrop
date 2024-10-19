@@ -13,7 +13,7 @@ trait JWTService:
   def verifyToken(token: String): Task[UserID]
 
 case class JWTServiceLive private (jwtConfig: JWTConfig) extends JWTService:
-  private val secret         = "secret"
+  private val secret         = jwtConfig.secret
   private val issuer         = "reviewboard.com"
   private val algorithm      = Algorithm.HMAC512(secret)
   private val ttl            = 3600 * 24 * 7 // 1 week

@@ -20,8 +20,8 @@ create table if not exists reviews (
                                            benefits int not null,
                                            would_recommend int not null,
                                            review text not null,
-                                           created timestamp not null default current_timestamp,
-                                           updated timestamp not null default current_timestamp
+                                           created timestamptz not null,
+                                           updated timestamptz not null
 );
 
 create table if not exists users
@@ -29,4 +29,12 @@ create table if not exists users
     id integer primary key generated always as identity,
     email text unique not null,
     hashed_password text not null
+);
+
+create table if not exists recovery_tokens
+(
+    email text primary key,
+    token text not null,
+    expiration bigint not null
 )
+

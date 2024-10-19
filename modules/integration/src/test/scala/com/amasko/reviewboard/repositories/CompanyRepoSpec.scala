@@ -1,5 +1,6 @@
 package com.amasko.reviewboard.repositories
 
+import com.amasko.reviewboard.PostgresTestContainer
 import zio.test.*
 import zio.*
 import org.testcontainers.containers.PostgreSQLContainer
@@ -33,31 +34,7 @@ object CompanyRepoSpec extends ZIOSpecDefault:
   )
     .provide(
       CompanyRepoLive.layer,
-      dsLayer
+      PostgresTestContainer.dsLayer
     )
-
-  private def pgContainer() = {
-    val container: PostgreSQLContainer[Nothing] =
-      new PostgreSQLContainer("postgres").withInitScript("sql/companies.sql")
-    container.start()
-    container
-  }
-
-  private def createDatasource(container: PostgreSQLContainer[Nothing]): javax.sql.DataSource = {
-    val datasource = new PGSimpleDataSource()
-    datasource.setUrl(container.getJdbcUrl)
-    datasource.setUser(container.getUsername)
-    datasource.setPassword(container.getPassword)
-
-    datasource
-  }
-
-  val dsLayer: ZLayer[Any, Throwable, Quill.Postgres[SnakeCase]] = ZLayer.scoped {
-    ZIO
-      .acquireRelease(ZIO.attempt(pgContainer()))(container =>
-        ZIO.attempt(container.stop()).catchAll(e => ZIO.logErrorCause(Cause.fail(e)))
-      )
-      .map(createDatasource)
-  } >>> Quill.Postgres.fromNamingStrategy(io.getquill.SnakeCase)
 
 end CompanyRepoSpec

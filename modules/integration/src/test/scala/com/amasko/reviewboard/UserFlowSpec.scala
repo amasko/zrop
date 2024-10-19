@@ -1,6 +1,6 @@
 package com.amasko.reviewboard
 
-import com.amasko.reviewboard.config.JWTConfig
+import com.amasko.reviewboard.config.{JWTConfig, RecoveryTokensConfig}
 import com.amasko.reviewboard.domain.data.UserToken
 import zio.*
 import zio.test.*
@@ -100,5 +100,6 @@ object UserFlowSpec extends ZIOSpecDefault:
       PostgresTestContainer.dsLayer,
       ZLayer.succeed(JWTConfig("secret", 3600)),
       EmailServiceLive.layer,
-      RecoveryTokensRepoLive.layer
+      RecoveryTokensRepoLive.layer,
+      ZLayer.succeed(RecoveryTokensConfig(3600))
     )

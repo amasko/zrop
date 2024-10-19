@@ -1,7 +1,8 @@
 package com.amasko.reviewboard
 package http
 
-import com.amasko.reviewboard.http.controllers.*
+import http.controllers.*
+import sttp.tapir.swagger.bundle.SwaggerInterpreter
 
 object HttpApi:
   private def gatherRouts(controllers: List[BaseController]) =
@@ -15,4 +16,7 @@ object HttpApi:
       userController    <- UserController.makeZIO
     yield List(healthController, companyController, reviewController, userController)
 
-  val routesZIO = makeControllers.map(gatherRouts)
+  val routesZIO = makeControllers.map(gatherRouts).map { rts =>
+    SwaggerInterpreter()
+      .fromServerEndpoints(rts, "zrop", "1.0.0") ::: rts
+  }

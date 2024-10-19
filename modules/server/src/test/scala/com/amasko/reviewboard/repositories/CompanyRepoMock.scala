@@ -1,7 +1,7 @@
 package com.amasko.reviewboard
 package repositories
 
-import domain.data.Company
+import com.amasko.reviewboard.domain.data.Company
 import zio.ULayer
 
 class CompanyRepoMock(db: zio.Ref[Map[Long, Company]]) extends CompanyRepo:
