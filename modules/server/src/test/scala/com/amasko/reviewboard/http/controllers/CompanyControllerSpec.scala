@@ -12,9 +12,10 @@ import zio.test.*
 import zio.json.*
 import zio.test.Assertion.*
 import sttp.client3.*
-import com.amasko.reviewboard.domain.data.Company
+import com.amasko.reviewboard.domain.data.{Company, User, UserID, UserToken}
 import com.amasko.reviewboard.repositories.CompanyRepoMock
 import com.amasko.reviewboard.services.CompanyServiceLive
+import com.amasko.reviewboard.services.JWTService
 import sttp.tapir.server.ServerEndpoint
 
 object CompanyControllerSpec extends ZIOSpecDefault {
@@ -32,6 +33,16 @@ object CompanyControllerSpec extends ZIOSpecDefault {
       )
     yield backend
 
+  val jwtServiceStub = new JWTService {
+    def createToken(user: User): Task[UserToken] = ZIO.succeed(
+      UserToken(user.email, "token", 999999999L)
+    )
+
+    def verifyToken(token: String): Task[UserID] = ZIO.succeed(
+      UserID(1, "test@test.com")
+    )
+  }
+
   override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("CompanyController")(
       test("should create a company") {
@@ -39,6 +50,7 @@ object CompanyControllerSpec extends ZIOSpecDefault {
           b <- backend(_.createCompany)
           response <- basicRequest
             .post(uri"/companies")
+            .header("Authorization", "Bearer token")
             .body(CreateCompanyRequest("Company Name", "nompanyname.com", None, None).toJson)
 //            .response(asJson[CreateCompanyRequest])
             .send(b)
@@ -50,7 +62,8 @@ object CompanyControllerSpec extends ZIOSpecDefault {
       }
     ).provide(
       CompanyServiceLive.layer,
-      CompanyRepoMock.layer
+      CompanyRepoMock.layer,
+      ZLayer.succeed(jwtServiceStub)
     )
 
 }

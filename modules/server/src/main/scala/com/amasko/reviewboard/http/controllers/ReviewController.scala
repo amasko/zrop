@@ -2,19 +2,18 @@ package com.amasko.reviewboard
 package http
 package controllers
 
-import services.ReviewService
+import services.{JWTService, ReviewService}
 import domain.data.Review
-import endpoints.ReviewEndpoints
-
+import endpoints.{ReviewEndpoints, SecureEndpoint}
 import zio.*
 
-class ReviewController private (service: ReviewService) extends BaseController with ReviewEndpoints:
+class ReviewController private (service: ReviewService, jwt: JWTService) extends BaseController with ReviewEndpoints with SecureEndpoint(jwt):
 
   val createReview = createEndpoint
-    .serverLogic[Task] { request =>
+    .serverLogic { user => request => // todo use user?
       val result = for
         now <- Clock.instant
-        review = request.toReview(0L, now)
+        review = request.toReview(user.id, now)
         created <- service.create(review)
       yield created
 
@@ -37,5 +36,7 @@ class ReviewController private (service: ReviewService) extends BaseController w
 
 object ReviewController:
   def makeZIO =
-    for service <- ZIO.service[ReviewService]
-    yield new ReviewController(service)
+    for 
+      service <- ZIO.service[ReviewService]
+      jwt <- ZIO.service[JWTService]
+    yield new ReviewController(service, jwt)

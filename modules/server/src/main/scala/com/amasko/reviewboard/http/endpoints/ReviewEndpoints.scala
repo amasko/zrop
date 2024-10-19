@@ -9,10 +9,10 @@ import sttp.tapir.json.zio.*
 import sttp.tapir.ztapir.*
 import sttp.tapir.generic.auto.*
 
-trait ReviewEndpoints extends BaseEndpoint:
+trait ReviewEndpoints extends SecureEndpoint:
 
   val createEndpoint =
-    baseEndpoint
+    secureBaseEndpoint
       .tag("reviews")
       .name("create")
       .description("create a review")

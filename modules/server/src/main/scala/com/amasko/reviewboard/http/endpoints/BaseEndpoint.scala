@@ -2,9 +2,9 @@ package com.amasko.reviewboard
 package http
 package endpoints
 
-import sttp.tapir.*
-
 import domain.errors.HttpErr
+
+import sttp.tapir.*
 
 trait BaseEndpoint:
 
@@ -13,7 +13,5 @@ trait BaseEndpoint:
 //    .mapErrorOut(HttpErr.encode)(HttpErr.decode)
 //    .mapErrorOut(Mapping.from(HttpErr.decode.tupled)(HttpErr.encode))
     .mapErrorOut[Throwable](HttpErr.decode.tupled)(HttpErr.encode)
-
-//  val secureBaseEndpoint = baseEndpoint.in(auth.bearer)
 
 end BaseEndpoint

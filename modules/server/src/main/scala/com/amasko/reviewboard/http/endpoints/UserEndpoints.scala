@@ -2,14 +2,17 @@ package com.amasko.reviewboard
 package http
 package endpoints
 
-import sttp.tapir.json.zio.*
-import sttp.tapir.ztapir.*
-import sttp.tapir.generic.auto.*
+import services.JWTService
 import domain.data.{UserID, UserToken}
 import requests.{ForgottenPassword, Login, PasswordRecovery, RegisterUser, UpdatePassword}
 import responses.UserResponse
 
-trait UserEndpoints extends BaseEndpoint:
+import sttp.tapir.json.zio.*
+import sttp.tapir.ztapir.*
+import sttp.tapir.generic.auto.*
+
+
+trait UserEndpoints extends SecureEndpoint:
 
   val registerUser =
     baseEndpoint
@@ -22,7 +25,7 @@ trait UserEndpoints extends BaseEndpoint:
       .out(jsonBody[UserResponse])
 
   val updatePasswordEndpoint =
-    baseEndpoint
+    secureBaseEndpoint
       .tag("Users")
       .name("updatePassword")
       .description("update a user's password")
@@ -32,7 +35,7 @@ trait UserEndpoints extends BaseEndpoint:
       .out(jsonBody[UserResponse])
 
   val deleteUserEndpoint =
-    baseEndpoint
+    secureBaseEndpoint
       .tag("Users")
       .name("delete")
       .description("delete a user")

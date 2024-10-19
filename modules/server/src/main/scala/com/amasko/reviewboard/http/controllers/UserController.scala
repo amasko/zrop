@@ -5,14 +5,14 @@ package controllers
 import domain.data.UserID
 import zio.*
 import sttp.tapir.*
-import endpoints.UserEndpoints
+import endpoints.{BaseEndpoint, SecureEndpoint, UserEndpoints}
 import services.UserService
 import services.JWTService
 import responses.UserResponse
 
 case class UserController private (userService: UserService, jwt: JWTService)
     extends BaseController
-    with UserEndpoints:
+    with UserEndpoints with SecureEndpoint(jwt):
 
   val createUser = registerUser.serverLogic[Task] { user =>
     userService
@@ -26,13 +26,6 @@ case class UserController private (userService: UserService, jwt: JWTService)
   }
 
   val updatePass = updatePasswordEndpoint
-    .securityIn(auth.bearer[String]())
-    .serverSecurityLogic[UserID, Task] { tok =>
-      jwt
-        .verifyToken(tok)
-//      .map(r => UserResponse(r.email))
-        .either
-    }
     .serverLogic { useId => req =>
       userService
         .updatePassword(req.email, req.oldPassword, req.newPassword)
@@ -41,16 +34,11 @@ case class UserController private (userService: UserService, jwt: JWTService)
     }
 
   val deleteUser = deleteUserEndpoint
-    .securityIn(auth.bearer[String]())
-    .serverSecurityLogic[UserID, Task] { tok =>
-      jwt.verifyToken(tok).either
-    }
-    .serverLogic(useId =>
-      log =>
-        userService
-          .deleteUser(log.email, log.password)
-          .map(r => UserResponse(r.email))
-          .either
+    .serverLogic(useId => log =>
+      userService
+        .deleteUser(log.email, log.password)
+        .map(r => UserResponse(r.email))
+        .either
     )
 
   val forgotPassword = forgottenPasswordEndpoint.serverLogic[Task] { req =>

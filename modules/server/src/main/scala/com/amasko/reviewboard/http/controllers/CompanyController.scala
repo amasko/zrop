@@ -2,20 +2,22 @@ package com.amasko.reviewboard
 package http
 package controllers
 
-import com.amasko.reviewboard.domain.data.Company
-import com.amasko.reviewboard.http.requests.CreateCompanyRequest
-import services.CompanyService
-import endpoints.CompanyEndpoints
+import domain.data.Company
+import requests.CreateCompanyRequest
+import services.{CompanyService, JWTService}
+
+import endpoints.{CompanyEndpoints, SecureEndpoint}
 import sttp.tapir.server.ServerEndpoint.Full
 import zio.*
 
-class CompanyController private (service: CompanyService)
+class CompanyController private (service: CompanyService, jwt: JWTService)
     extends BaseController
-    with CompanyEndpoints:
+    with CompanyEndpoints
+    with SecureEndpoint(jwt):
 
-  val createCompany: Full[Unit, Unit, CreateCompanyRequest, Throwable, Company, Any, Task] =
+  val createCompany =
     createEndpoint
-      .serverLogic[Task](request => service.create(request.toCompany(0L)).either)
+      .serverLogic(user => request => service.create(request.toCompany(0L)).either)
 
   val getAllCompanies = getAllEndpoint
     .serverLogic[Task](_ => service.getCompanies.either)
@@ -31,5 +33,7 @@ class CompanyController private (service: CompanyService)
 
 object CompanyController:
   def makeZIO =
-    for service <- ZIO.service[CompanyService]
-    yield new CompanyController(service)
+    for
+      service <- ZIO.service[CompanyService]
+      jwt     <- ZIO.service[JWTService]
+    yield new CompanyController(service, jwt)

@@ -8,7 +8,6 @@ import java.time.Instant
 
 case class CreateReviewRequest(
     companyId: Long,
-    userId: Long,
     management: Int,
     culture: Int,
     salary: Int,
@@ -16,9 +15,9 @@ case class CreateReviewRequest(
     wouldRecommend: Int,
     review: String
 ):
-  def toReview(id: Long, i: Instant): Review =
+  def toReview(userId: Long, i: Instant): Review =
     Review(
-      id,
+      -0L,
       companyId,
       userId,
       management,
