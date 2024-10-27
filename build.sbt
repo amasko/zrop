@@ -113,6 +113,7 @@ lazy val integration = (project in file("modules/integration"))
 //    testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework"))
   )
   .dependsOn(server % Cctt)
+  .dependsOn(common.jvm % Cctt)
 
 
 lazy val root = (project in file("."))

@@ -2,11 +2,11 @@ package com.amasko.reviewboard
 package http
 package controllers
 
-import domain.data.Company
+import domain.data.{Company, UserID}
 import requests.CreateCompanyRequest
 import services.{CompanyService, JWTService}
 
-import endpoints.{CompanyEndpoints, SecureEndpoint}
+import endpoints.CompanyEndpoints
 import sttp.tapir.server.ServerEndpoint.Full
 import zio.*
 
@@ -17,6 +17,7 @@ class CompanyController private (service: CompanyService, jwt: JWTService)
 
   val createCompany =
     createEndpoint
+      .serverSecurityLogic[UserID, Task](verify)
       .serverLogic(user => request => service.create(request.toCompany(0L)).either)
 
   val getAllCompanies = getAllEndpoint

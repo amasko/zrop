@@ -5,10 +5,10 @@ package endpoints
 import com.amasko.reviewboard.domain.data.Company
 import requests.CreateCompanyRequest
 import sttp.tapir.json.zio.*
-import sttp.tapir.ztapir.*
 import sttp.tapir.generic.auto.*
+import sttp.tapir.*
 
-trait CompanyEndpoints extends SecureEndpoint:
+trait CompanyEndpoints extends BaseEndpoint:
   val createEndpoint =
     secureBaseEndpoint
       .tag("companies")

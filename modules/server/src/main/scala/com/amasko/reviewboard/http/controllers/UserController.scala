@@ -5,7 +5,7 @@ package controllers
 import domain.data.UserID
 import zio.*
 import sttp.tapir.*
-import endpoints.{BaseEndpoint, SecureEndpoint, UserEndpoints}
+import endpoints.{BaseEndpoint, UserEndpoints}
 import services.UserService
 import services.JWTService
 import responses.UserResponse
@@ -26,6 +26,7 @@ case class UserController private (userService: UserService, jwt: JWTService)
   }
 
   val updatePass = updatePasswordEndpoint
+    .serverSecurityLogic[UserID, Task](verify)
     .serverLogic { useId => req =>
       userService
         .updatePassword(req.email, req.oldPassword, req.newPassword)
@@ -34,6 +35,7 @@ case class UserController private (userService: UserService, jwt: JWTService)
     }
 
   val deleteUser = deleteUserEndpoint
+    .serverSecurityLogic[UserID, Task](verify)
     .serverLogic(useId => log =>
       userService
         .deleteUser(log.email, log.password)

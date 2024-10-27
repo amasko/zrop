@@ -8,7 +8,9 @@ final case class Company(
     name: String,
     url: String,
     location: Option[String],
-    country: Option[String]
+    country: Option[String],
+    image: Option[String],
+    tags: List[String]
 )
 
 object Company:

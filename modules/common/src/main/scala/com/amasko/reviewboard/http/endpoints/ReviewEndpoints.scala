@@ -2,14 +2,14 @@ package com.amasko.reviewboard
 package http
 package endpoints
 
-import com.amasko.reviewboard.domain.data.Review
+import domain.data.Review
 import requests.CreateReviewRequest
 
 import sttp.tapir.json.zio.*
-import sttp.tapir.ztapir.*
 import sttp.tapir.generic.auto.*
+import sttp.tapir.*
 
-trait ReviewEndpoints extends SecureEndpoint:
+trait ReviewEndpoints extends BaseEndpoint:
 
   val createEndpoint =
     secureBaseEndpoint

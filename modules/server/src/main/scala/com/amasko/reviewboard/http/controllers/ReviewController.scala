@@ -3,14 +3,15 @@ package http
 package controllers
 
 import services.{JWTService, ReviewService}
-import domain.data.Review
-import endpoints.{ReviewEndpoints, SecureEndpoint}
+import domain.data.{Review, UserID}
+import endpoints.ReviewEndpoints
 import zio.*
 
 class ReviewController private (service: ReviewService, jwt: JWTService) extends BaseController with ReviewEndpoints with SecureEndpoint(jwt):
 
   val createReview = createEndpoint
-    .serverLogic { user => request => // todo use user?
+    .serverSecurityLogic[UserID, Task](verify)
+    .serverLogic { user => request =>
       val result = for
         now <- Clock.instant
         review = request.toReview(user.id, now)

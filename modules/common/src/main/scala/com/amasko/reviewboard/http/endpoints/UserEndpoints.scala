@@ -2,17 +2,16 @@ package com.amasko.reviewboard
 package http
 package endpoints
 
-import services.JWTService
 import domain.data.{UserID, UserToken}
 import requests.{ForgottenPassword, Login, PasswordRecovery, RegisterUser, UpdatePassword}
 import responses.UserResponse
 
 import sttp.tapir.json.zio.*
-import sttp.tapir.ztapir.*
 import sttp.tapir.generic.auto.*
+import sttp.tapir.*
 
 
-trait UserEndpoints extends SecureEndpoint:
+trait UserEndpoints extends BaseEndpoint:
 
   val registerUser =
     baseEndpoint
