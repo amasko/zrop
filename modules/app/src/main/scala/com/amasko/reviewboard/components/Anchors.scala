@@ -7,10 +7,10 @@ import org.scalajs.dom
 import frontroute.*
 
 object Anchors {
-  
+
   def renderNavLink(text: String, location: String, cssClasses: String = "") = {
     a(
-      cls := "nav-link",
+      cls  := cssClasses,
       href := location,
       text
     )

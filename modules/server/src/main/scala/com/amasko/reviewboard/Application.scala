@@ -4,12 +4,12 @@ import repositories.*
 import services.*
 import http.HttpApi
 import config.Configs
-
 import zio.*
 import zio.http.Server
 import sttp.tapir.server.ziohttp.*
 import io.getquill.SnakeCase
 import io.getquill.jdbczio.Quill
+import sttp.tapir.server.interceptor.cors.CORSInterceptor
 
 object Application extends ZIOAppDefault:
 
@@ -21,7 +21,9 @@ object Application extends ZIOAppDefault:
     routes <- HttpApi.routesZIO
     _ <- Server.serve(
       ZioHttpInterpreter(
-        ZioHttpServerOptions.default
+        ZioHttpServerOptions.default.appendInterceptor(
+            CORSInterceptor.default
+        )
       ).toHttp(
         routes
       )

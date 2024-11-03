@@ -3,16 +3,31 @@ package pages
 
 import domain.data.Company
 import common.Constants
+import http.endpoints.CompanyEndpoints
 import com.raquo.laminar.api.L.{*, given}
 import org.scalajs.dom
 import components.Anchors
 
+import sttp.client3.impl.zio.FetchZioBackend
+import sttp.client3.*
+import sttp.tapir.client.sttp.SttpClientInterpreter
+import zio.*
+import sttp.client3.httpclient.zio.SttpClient
+import sttp.tapir.PublicEndpoint
+
+import core.ZJS.*
+
 object CompaniesPage:
 
-  val dummyCompany = Company(1, "dummy-company", "Dummy Super company", "https://dummy.com", Some("Some city"), Some("Some country"), None, List("tag1", "tag2"))
+  val companiesBus = EventBus[List[Company]]()
+
+  private def performBackendCall() =
+    val resultZIO = callBackend(_.callEndpoint(_.companies.getAllEndpoint)(()))
+    resultZIO.emitTo(companiesBus)
 
   def apply() =
     sectionTag(
+      onMountCallback(_ => performBackendCall()),
       cls := "section-1",
       div(
         cls := "container company-list-hero",
@@ -31,8 +46,7 @@ object CompaniesPage:
           ),
           div(
             cls := "col-lg-8",
-            renderCompany(dummyCompany),
-            renderCompany(dummyCompany)
+            children <-- companiesBus.events.map(_.map(renderCompany))
           )
         )
       )
@@ -44,9 +58,11 @@ object CompaniesPage:
       src := c.image.getOrElse(Constants.defaultCompanyLogo),
       alt := c.name
     )
-    
+
   private def locationString(c: Company) =
-    c.location.map(l => s"$l, ${c.country.getOrElse("Unknown country")}").getOrElse("Unknown location")
+    c.location
+      .map(l => s"$l, ${c.country.getOrElse("Unknown country")}")
+      .getOrElse("Unknown location")
 
   private def renderDetail(icon: String, value: String) =
     div(
@@ -62,9 +78,9 @@ object CompaniesPage:
     div(
       cls := "company-summary",
       renderDetail("location-dot", locationString(c)),
-      renderDetail("tags",c.tags.mkString(", ")),
+      renderDetail("tags", c.tags.mkString(", "))
     )
-    
+
   private def renderAction(c: Company) =
     div(
       cls := "jvm-recent-companies-card-btn-apply",
