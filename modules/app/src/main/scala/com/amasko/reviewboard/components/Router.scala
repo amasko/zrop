@@ -10,22 +10,22 @@ import pages.*
 object Router {
   def apply() =
     mainTag(
-        routes(
-          div(
-            cls := "container-fluid",
-            (pathEnd | path("companies")) {
-                CompaniesPage()
-            },
-            path("login") {
-                LoginPage()
-            },
-            path("signup") {
-              SignUpPage()
-            },
-            noneMatched {
-              NotFoundPage()
-            }
-          )
+      routes(
+        div(
+          cls := "container-fluid",
+          (pathEnd | path("companies")) {
+            CompaniesPage()
+          },
+          path("login") {
+            LoginPage()
+          },
+          path("signup") {
+            SignUpPage()
+          },
+          noneMatched {
+            NotFoundPage()
+          }
+        )
 //          div(
 //            cls := "container-fluid",
 //            pathEnd {
@@ -47,6 +47,6 @@ object Router {
 //                )
 //            },
 //          )
-        )
+      )
     )
 }

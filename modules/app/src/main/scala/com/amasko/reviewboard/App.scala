@@ -12,15 +12,14 @@ object App {
     cls := "container",
     Header(),
     Router()
-    )
+  )
     .amend(LinkHandler.bind) // for internal links
 
-    def main(args: Array[String]): Unit = {
-        val appContainer = dom.document.querySelector("#app")
-        render(
-          appContainer,
-          app
-        )
-    }
+  def main(args: Array[String]): Unit = {
+    val appContainer = dom.document.querySelector("#app")
+    render(
+      appContainer,
+      app
+    )
+  }
 }
-  

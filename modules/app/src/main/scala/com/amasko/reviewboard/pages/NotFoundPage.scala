@@ -5,14 +5,14 @@ import com.raquo.laminar.api.L.{*, given}
 import org.scalajs.dom
 
 object NotFoundPage:
-    def apply() =
+  def apply() =
+    div(
+      cls := "container-fluid",
+      div(
+        cls := "row",
         div(
-        cls := "container-fluid",
-        div(
-            cls := "row",
-            div(
-            cls := "col-12",
-            h1("404 Not Found")
-            )
+          cls := "col-12",
+          h1("404 Not Found")
         )
-        )
+      )
+    )

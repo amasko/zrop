@@ -53,13 +53,13 @@ object Header {
   )
   def renderNavLink(text: String, location: String) =
     li(
-        cls := "nav-item",
-        Anchors.renderNavLink(text, location, "nav-link jvm-item")
+      cls := "nav-item",
+      Anchors.renderNavLink(text, location, "nav-link jvm-item")
     )
 
   def renderLogo() = {
     a(
-      cls := "navbar-brand",
+      cls  := "navbar-brand",
       href := "/",
       img(
         src := Constants.logoImg,
@@ -68,10 +68,5 @@ object Header {
       )
     )
   }
-
-
-
-
-
 
 }
