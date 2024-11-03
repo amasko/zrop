@@ -7,6 +7,7 @@ import http.endpoints.CompanyEndpoints
 import com.raquo.laminar.api.L.{*, given}
 import org.scalajs.dom
 import components.Anchors
+import components.FilterPanel
 
 import sttp.client3.impl.zio.FetchZioBackend
 import sttp.client3.*
@@ -42,7 +43,7 @@ object CompaniesPage:
           cls := "row jvm-recent-companies-body",
           div(
             cls := "col-lg-4",
-            div("TODO filter panel here")
+            FilterPanel()
           ),
           div(
             cls := "col-lg-8",

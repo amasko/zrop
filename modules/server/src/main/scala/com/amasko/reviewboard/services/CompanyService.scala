@@ -1,7 +1,7 @@
 package com.amasko.reviewboard
 package services
 
-import domain.data.Company
+import domain.data.*
 import repositories.CompanyRepo
 
 import zio.*
@@ -13,6 +13,7 @@ trait CompanyService {
   def create(company: Company): Task[Company]
 //  def update(company: Company): Task[Company]
   def delete(id: Long): Task[Company]
+  def getFilters: Task[CompanyFilter]
 
 }
 
@@ -24,6 +25,8 @@ final case class CompanyServiceLive(repo: CompanyRepo) extends CompanyService:
   override def delete(id: Long): Task[Company] = repo.delete(id)
 
   override def getCompany(slug: String): Task[Option[Company]] = repo.getBySlug(slug)
+
+  override def getFilters: Task[CompanyFilter] = repo.getCompanyAttributes
 
 object CompanyServiceLive:
   val layer: ZLayer[CompanyRepo, Nothing, CompanyServiceLive] =

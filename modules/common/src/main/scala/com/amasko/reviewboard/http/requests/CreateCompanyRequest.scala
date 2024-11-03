@@ -9,11 +9,12 @@ final case class CreateCompanyRequest(
     url: String,
     location: Option[String],
     country: Option[String],
+    industry: Option[String],
     image: Option[String],
     tags: List[String]
 ):
   def toCompany(id: Long): Company =
-    Company(id, CreateCompanyRequest.toSlug(name), name, url, location, country, image, tags)
+    Company(id, CreateCompanyRequest.toSlug(name), name, url, location, country, industry, image, tags)
 
 object CreateCompanyRequest:
   import zio.json.{DeriveJsonCodec, JsonCodec}

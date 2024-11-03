@@ -2,7 +2,7 @@ package com.amasko.reviewboard
 package http
 package endpoints
 
-import com.amasko.reviewboard.domain.data.Company
+import domain.data.{Company, CompanyFilter}
 import requests.CreateCompanyRequest
 import sttp.tapir.json.zio.*
 import sttp.tapir.generic.auto.*
@@ -36,3 +36,12 @@ trait CompanyEndpoints extends BaseEndpoint:
       .in("companies" / path[String]("id"))
       .get
       .out(jsonBody[Option[Company]])
+    
+  val allFilters =
+    baseEndpoint
+      .tag("companies")
+      .name("allFilters")
+      .description("get all filters")
+      .in("companies" / "filters")
+      .get
+      .out(jsonBody[CompanyFilter])

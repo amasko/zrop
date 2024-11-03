@@ -1,19 +1,20 @@
 package com.amasko.reviewboard
 package repositories
 
-import domain.data.Company
+import domain.data.{Company, CompanyFilter}
 
 import io.getquill.jdbczio.Quill
 import io.getquill.*
 
 import zio.*
 trait CompanyRepo:
-  def create(c: Company): zio.Task[Company]
-  def update(id: Long, op: Company => Company): zio.Task[Company]
-  def delete(id: Long): zio.Task[Company]
-  def getById(id: Long): zio.Task[Option[Company]]
-  def getAll: zio.Task[List[Company]]
-  def getBySlug(slug: String): zio.Task[Option[Company]]
+  def create(c: Company): Task[Company]
+  def update(id: Long, op: Company => Company): Task[Company]
+  def delete(id: Long): Task[Company]
+  def getById(id: Long): Task[Option[Company]]
+  def getAll: Task[List[Company]]
+  def getBySlug(slug: String): Task[Option[Company]]
+  def getCompanyAttributes: Task[CompanyFilter]
 
 class CompanyRepoLive(quill: Quill.Postgres[SnakeCase]) extends CompanyRepo:
   import quill.*
@@ -45,6 +46,15 @@ class CompanyRepoLive(quill: Quill.Postgres[SnakeCase]) extends CompanyRepo:
 
   override def getBySlug(slug: String): Task[Option[Company]] =
     run(query[Company].filter(_.slug == lift(slug))).map(_.headOption)
+
+
+  override def getCompanyAttributes: Task[CompanyFilter] =
+    for 
+      tags <- run(query[Company].map(_.tags).distinct).map(_.flatten.distinct)
+      locations <- run(query[Company].map(_.location).distinct).map(_.flatMap(_.toList))
+      companies <- run(query[Company].map(_.name).distinct)
+      industries <- run(query[Company].map(_.industry)).map(_.flatMap(_.toList))
+    yield CompanyFilter(locations, companies, industries, tags)
 
 object CompanyRepoLive:
   val layer = ZLayer.fromFunction((pg: Quill.Postgres[SnakeCase]) => CompanyRepoLive(pg))
