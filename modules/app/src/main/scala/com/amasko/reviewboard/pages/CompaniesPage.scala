@@ -20,15 +20,23 @@ import core.ZJS.*
 
 object CompaniesPage:
 
-  val companiesBus = EventBus[List[Company]]()
+//  val companiesBus = EventBus[List[Company]]()
 
-  private def performBackendCall() =
-    val resultZIO = callBackend(_.callEndpoint(_.companies.getAllEndpoint)(()))
-    resultZIO.emitTo(companiesBus)
+  val companyEvents: EventStream[List[Company]] =
+    callBackend(_.callEndpoint(_.companies.getAllEndpoint)(())).toEventSteam.mergeWith(
+      FilterPanel.triggerFilters
+        .flatMapMerge(filter =>
+          callBackend(_.callEndpoint(_.companies.searchEndpoint)(filter)).toEventSteam
+        )
+    )
+
+//  private def performBackendCall() =
+//    val resultZIO = callBackend(_.callEndpoint(_.companies.getAllEndpoint)(()))
+//    resultZIO.emitTo(companiesBus)
 
   def apply() =
     sectionTag(
-      onMountCallback(_ => performBackendCall()),
+//      onMountCallback(_ => performBackendCall()),
       cls := "section-1",
       div(
         cls := "container company-list-hero",
@@ -47,7 +55,7 @@ object CompaniesPage:
           ),
           div(
             cls := "col-lg-8",
-            children <-- companiesBus.events.map(_.map(renderCompany))
+            children <-- companyEvents.map(_.map(renderCompany))
           )
         )
       )

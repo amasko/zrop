@@ -14,7 +14,8 @@ object CompanyRepoSpec extends ZIOSpecDefault:
 
   private def genString() = scala.util.Random.alphanumeric.take(10).mkString
 
-  private def genCompany(): Company = Company(0L, genString(), genString(), genString(), None, None, None, Nil)
+  private def genCompany(): Company =
+    Company(0L, genString(), genString(), genString(), None, None, None, Nil)
 
   def spec = suite("CompanyRepoSpec")(
     test("create company") {

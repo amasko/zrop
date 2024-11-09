@@ -14,6 +14,7 @@ trait CompanyService {
 //  def update(company: Company): Task[Company]
   def delete(id: Long): Task[Company]
   def getFilters: Task[CompanyFilter]
+  def search(filters: CompanyFilter): Task[List[Company]]
 
 }
 
@@ -27,6 +28,9 @@ final case class CompanyServiceLive(repo: CompanyRepo) extends CompanyService:
   override def getCompany(slug: String): Task[Option[Company]] = repo.getBySlug(slug)
 
   override def getFilters: Task[CompanyFilter] = repo.getCompanyAttributes
+
+  override def search(filters: CompanyFilter): Task[List[Company]] =
+    repo.search(filters)
 
 object CompanyServiceLive:
   val layer: ZLayer[CompanyRepo, Nothing, CompanyServiceLive] =

@@ -7,7 +7,10 @@ import domain.data.{Review, UserID}
 import endpoints.ReviewEndpoints
 import zio.*
 
-class ReviewController private (service: ReviewService, jwt: JWTService) extends BaseController with ReviewEndpoints with SecureEndpoint(jwt):
+class ReviewController private (service: ReviewService, jwt: JWTService)
+    extends BaseController
+    with ReviewEndpoints
+    with SecureEndpoint(jwt):
 
   val createReview = createEndpoint
     .serverSecurityLogic[UserID, Task](verify)
@@ -37,7 +40,7 @@ class ReviewController private (service: ReviewService, jwt: JWTService) extends
 
 object ReviewController:
   def makeZIO =
-    for 
+    for
       service <- ZIO.service[ReviewService]
-      jwt <- ZIO.service[JWTService]
+      jwt     <- ZIO.service[JWTService]
     yield new ReviewController(service, jwt)

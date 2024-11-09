@@ -14,7 +14,7 @@ case class EmailConfig(host: String, port: Int, user: String, password: String)
 
 object Configs:
   private val config = deriveConfig[RootConf].mapKey(toKebabCase)
-  
+
   type Configuration = JWTConfig & RecoveryTokensConfig & EmailConfig
 
 //  def getConfig[A: DeriveConfig]: IO[Config.Error, A] = TypesafeConfigProvider.fromResourcePath().load(deriveConfig[A].mapKey(toKebabCase))

@@ -29,11 +29,14 @@ class CompanyController private (service: CompanyService, jwt: JWTService)
         case Some(id) => service.getCompany(id).either
         case None     => service.getCompany(id).either
     )
-  
+
   val getCompanyFilters = allFilters
     .serverLogic[Task](_ => service.getFilters.either)
 
-  val routes = List(createCompany, getAllCompanies, getCompanyFilters, getCompanyById)
+  val search = searchEndpoint
+    .serverLogic[Task](filter => service.search(filter).either)
+
+  val routes = List(createCompany, getAllCompanies, getCompanyFilters, search, getCompanyById)
 
 object CompanyController:
   def makeZIO =

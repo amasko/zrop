@@ -51,7 +51,9 @@ object CompanyControllerSpec extends ZIOSpecDefault {
           response <- basicRequest
             .post(uri"/companies")
             .header("Authorization", "Bearer token")
-            .body(CreateCompanyRequest("Company Name", "nompanyname.com", None, None, None, Nil).toJson)
+            .body(
+              CreateCompanyRequest("Company Name", "nompanyname.com", None, None, None, Nil).toJson
+            )
 //            .response(asJson[CreateCompanyRequest])
             .send(b)
           body <- ZIO.from(response.body.map(_.fromJson[Company]))

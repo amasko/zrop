@@ -15,6 +15,7 @@ trait CompanyRepo:
   def getAll: Task[List[Company]]
   def getBySlug(slug: String): Task[Option[Company]]
   def getCompanyAttributes: Task[CompanyFilter]
+  def search(filters: CompanyFilter): Task[List[Company]]
 
 class CompanyRepoLive(quill: Quill.Postgres[SnakeCase]) extends CompanyRepo:
   import quill.*
@@ -47,14 +48,31 @@ class CompanyRepoLive(quill: Quill.Postgres[SnakeCase]) extends CompanyRepo:
   override def getBySlug(slug: String): Task[Option[Company]] =
     run(query[Company].filter(_.slug == lift(slug))).map(_.headOption)
 
-
   override def getCompanyAttributes: Task[CompanyFilter] =
-    for 
-      tags <- run(query[Company].map(_.tags).distinct).map(_.flatten.distinct)
-      locations <- run(query[Company].map(_.location).distinct).map(_.flatMap(_.toList))
-      companies <- run(query[Company].map(_.name).distinct)
-      industries <- run(query[Company].map(_.industry)).map(_.flatMap(_.toList))
-    yield CompanyFilter(locations, companies, industries, tags)
+    for
+      tags       <- run(query[Company].map(_.tags).distinct).map(_.flatten.distinct)
+      locations  <- run(query[Company].map(_.location).distinct).map(_.flatMap(_.toList))
+      countries  <- run(query[Company].map(_.country).distinct).map(_.flatMap(_.toList))
+      companies  <- run(query[Company].map(_.name).distinct)
+      industries <- run(query[Company].map(_.industry).distinct).map(_.flatMap(_.toList))
+    yield CompanyFilter(locations, companies, countries, industries, tags)
+
+  override def search(filters: CompanyFilter): Task[List[Company]] =
+    run(
+      query[Company]
+        .filter(c =>
+          liftQuery(filters.locations).contains(c.location) ||
+            liftQuery(filters.countries).contains(c.country) ||
+            liftQuery(filters.companies).contains(c.name) ||
+            liftQuery(filters.industries).contains(c.industry) ||
+            sql"${c.tags} && ${lift(filters.tags)}".as[Boolean]
+//                query[Company]
+//                  .filter(c1 => c1.id == c.id)
+//                  .concatMap(_.tags)
+//                  .filter(t => liftQuery(filters.tags).contains(t))
+//                  .nonEmpty
+        )
+    )
 
 object CompanyRepoLive:
   val layer = ZLayer.fromFunction((pg: Quill.Postgres[SnakeCase]) => CompanyRepoLive(pg))

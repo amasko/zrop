@@ -12,7 +12,8 @@ import responses.UserResponse
 
 case class UserController private (userService: UserService, jwt: JWTService)
     extends BaseController
-    with UserEndpoints with SecureEndpoint(jwt):
+    with UserEndpoints
+    with SecureEndpoint(jwt):
 
   val createUser = registerUser.serverLogic[Task] { user =>
     userService
@@ -36,11 +37,12 @@ case class UserController private (userService: UserService, jwt: JWTService)
 
   val deleteUser = deleteUserEndpoint
     .serverSecurityLogic[UserID, Task](verify)
-    .serverLogic(useId => log =>
-      userService
-        .deleteUser(log.email, log.password)
-        .map(r => UserResponse(r.email))
-        .either
+    .serverLogic(useId =>
+      log =>
+        userService
+          .deleteUser(log.email, log.password)
+          .map(r => UserResponse(r.email))
+          .either
     )
 
   val forgotPassword = forgottenPasswordEndpoint.serverLogic[Task] { req =>
@@ -57,7 +59,8 @@ case class UserController private (userService: UserService, jwt: JWTService)
       .either
   }
 
-  override val routes = List(createUser, login, deleteUser, updatePass, recoverPassword, forgotPassword)
+  override val routes =
+    List(createUser, login, deleteUser, updatePass, recoverPassword, forgotPassword)
 
 object UserController:
   def makeZIO =
