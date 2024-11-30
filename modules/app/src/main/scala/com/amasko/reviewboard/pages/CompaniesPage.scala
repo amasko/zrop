@@ -23,10 +23,10 @@ object CompaniesPage:
 //  val companiesBus = EventBus[List[Company]]()
 
   val companyEvents: EventStream[List[Company]] =
-    callBackend(_.callEndpoint(_.companies.getAllEndpoint)(())).toEventSteam.mergeWith(
+    callBackend(_.call(_.companies.getAllEndpoint)(())).toEventSteam.mergeWith(
       FilterPanel.triggerFilters
         .flatMapMerge(filter =>
-          callBackend(_.callEndpoint(_.companies.searchEndpoint)(filter)).toEventSteam
+          callBackend(_.call(_.companies.searchEndpoint)(filter)).toEventSteam
         )
     )
 
@@ -42,7 +42,7 @@ object CompaniesPage:
         cls := "container company-list-hero",
         h1(
           cls := "company-list-title",
-          "Rock the JVM Companies Board"
+          "Companies Board"
         )
       ),
       div(

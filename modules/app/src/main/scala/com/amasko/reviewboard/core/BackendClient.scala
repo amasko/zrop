@@ -12,8 +12,7 @@ import sttp.tapir.PublicEndpoint
 trait BackendClient:
   def companies: CompanyEndpoints
 
-  def call[I, O](e: PublicEndpoint[I, Throwable, O, Any], input: I): Task[O]
-  def callEndpoint[I, O](endpointFn: BackendClient => PublicEndpoint[I, Throwable, O, Any])(
+  def call[I, O](endpointFn: BackendClient => PublicEndpoint[I, Throwable, O, Any])(
       input: I
   ): Task[O]
 
@@ -26,14 +25,15 @@ case class BackendClientLive(
 
   override val companies: CompanyEndpoints = new CompanyEndpoints {}
 
-  def call[I, O](e: PublicEndpoint[I, Throwable, O, Any], input: I): Task[O] =
-    val req = interpreter.toRequestThrowDecodeFailures(e, Some(uri"${config.url}")).apply(input)
-    be.send(req).map(_.body).absolve
+//  def call[I, O](e: PublicEndpoint[I, Throwable, O, Any], input: I): Task[O] =
+//    val req = interpreter.toRequestThrowDecodeFailures(e, Some(uri"${config.url}")).apply(input)
+//    be.send(req).map(_.body).absolve
 
-  override def callEndpoint[I, O](
+  override def call[I, O](
       endpointFn: BackendClient => PublicEndpoint[I, Throwable, O, Any]
   )(input: I): Task[O] =
-    call(endpointFn(self), input)
+    val req = interpreter.toRequestThrowDecodeFailures(endpointFn(self), Some(uri"${config.url}")).apply(input)
+    be.send(req).map(_.body).absolve
 
 object BackendClientLive:
   type Deps = BackendConfig & SttpClient & SttpClientInterpreter

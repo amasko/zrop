@@ -42,7 +42,7 @@ object FilterPanel:
   def apply() =
     div(
       onMountCallback(_ =>
-        callBackend(_.callEndpoint(_.companies.allFilters)(())).map(filterBus.set).runJs
+        callBackend(_.call(_.companies.allFilters)(())).map(filterBus.set).runJs
       ),
 //      child.text <-- filterBus.signal.map(_.toString),
 //      child.text <-- triggerFilters.map(_.toString),
