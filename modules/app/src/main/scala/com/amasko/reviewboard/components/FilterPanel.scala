@@ -11,10 +11,10 @@ import zio.*
 object FilterPanel:
   case class CheckedValue(groupName: String, value: String, isChecked: Boolean)
 
-  val group_location   = "Locations"
-  val group_countries  = "Countries"
-  val group_industries = "Industries"
-  val group_tags       = "Tags"
+  private val group_location   = "Locations"
+  private val group_countries  = "Countries"
+  private val group_industries = "Industries"
+  private val group_tags       = "Tags"
 
   private val filterBus   = Var[CompanyFilter](CompanyFilter())
   private val checkEvents = EventBus[CheckedValue]()
@@ -99,7 +99,7 @@ object FilterPanel:
       )
     )
 
-  def renderFilterOptions(groupName: String, optionsFn: CompanyFilter => List[String]) =
+  private def renderFilterOptions(groupName: String, optionsFn: CompanyFilter => List[String]) =
     div(
       cls := "accordion-item",
       h2(

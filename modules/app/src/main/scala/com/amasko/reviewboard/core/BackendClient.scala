@@ -1,7 +1,7 @@
 package com.amasko.reviewboard
 package core
 
-import com.amasko.reviewboard.http.endpoints.CompanyEndpoints
+import com.amasko.reviewboard.http.endpoints.{CompanyEndpoints, UserEndpoints}
 import sttp.client3.impl.zio.FetchZioBackend
 import sttp.client3.*
 import sttp.tapir.client.sttp.SttpClientInterpreter
@@ -11,6 +11,7 @@ import sttp.tapir.PublicEndpoint
 
 trait BackendClient:
   def companies: CompanyEndpoints
+  def users: UserEndpoints
 
   def call[I, O](endpointFn: BackendClient => PublicEndpoint[I, Throwable, O, Any])(
       input: I
@@ -24,6 +25,7 @@ case class BackendClientLive(
   self =>
 
   override val companies: CompanyEndpoints = new CompanyEndpoints {}
+  override val users: UserEndpoints        = new UserEndpoints {}
 
 //  def call[I, O](e: PublicEndpoint[I, Throwable, O, Any], input: I): Task[O] =
 //    val req = interpreter.toRequestThrowDecodeFailures(e, Some(uri"${config.url}")).apply(input)
@@ -32,7 +34,9 @@ case class BackendClientLive(
   override def call[I, O](
       endpointFn: BackendClient => PublicEndpoint[I, Throwable, O, Any]
   )(input: I): Task[O] =
-    val req = interpreter.toRequestThrowDecodeFailures(endpointFn(self), Some(uri"${config.url}")).apply(input)
+    val req = interpreter
+      .toRequestThrowDecodeFailures(endpointFn(self), Some(uri"${config.url}"))
+      .apply(input)
     be.send(req).map(_.body).absolve
 
 object BackendClientLive:
