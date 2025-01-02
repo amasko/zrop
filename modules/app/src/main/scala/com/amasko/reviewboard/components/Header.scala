@@ -4,9 +4,10 @@ package components
 import com.raquo.laminar.api.L.{*, given}
 import com.raquo.laminar.codecs.StringAsIsCodec
 import org.scalajs.dom
-import scala.scalajs.js
 
+import scala.scalajs.js
 import com.amasko.reviewboard.common.*
+import com.amasko.reviewboard.domain.data.UserToken
 
 object Header {
   def apply() =
@@ -36,7 +37,7 @@ object Header {
                 idAttr := "navbarNav",
                 ul(
                   cls := "navbar-nav ms-auto menu align-center expanded text-center SMN_effect-3",
-                  renderNavLinks()
+                  children <-- core.Session.userState.signal.map(renderNavLinks)
                 )
               )
             )
@@ -45,19 +46,32 @@ object Header {
       )
     )
 
-  def renderNavLinks() = List(
-    renderNavLink("Home", "/"),
-    renderNavLink("Companies", "/companies"),
-    renderNavLink("Log In", "/login"),
-    renderNavLink("Sign Up", "/signup")
-  )
-  def renderNavLink(text: String, location: String) =
+  private def renderNavLinks(maybeUser: Option[UserToken]) =
+    val variableLinks =
+      if maybeUser.nonEmpty then
+        List(
+          renderNavLink("Add Company", "/post"),
+          renderNavLink("Profile", "/profile"),
+          renderNavLink("Log Out", "/logout")
+        )
+      else
+        List(
+          renderNavLink("Log In", "/login"),
+          renderNavLink("Sign Up", "/signup")
+        )
+
+    List(
+      renderNavLink("Home", "/"),
+      renderNavLink("Companies", "/companies")
+    ) ++ variableLinks
+
+  private def renderNavLink(text: String, location: String) =
     li(
       cls := "nav-item",
       Anchors.renderNavLink(text, location, "nav-link jvm-item")
     )
 
-  def renderLogo() = {
+  private def renderLogo() = {
     a(
       cls  := "navbar-brand",
       href := "/",

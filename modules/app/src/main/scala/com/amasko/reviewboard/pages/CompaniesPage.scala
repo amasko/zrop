@@ -22,8 +22,11 @@ object CompaniesPage:
 
 //  val companiesBus = EventBus[List[Company]]()
 
+  val firstBatch = EventBus[List[Company]]()
+
   val companyEvents: EventStream[List[Company]] =
-    callBackend(_.call(_.companies.getAllEndpoint)(())).toEventSteam.mergeWith(
+//    callBackend(_.call(_.companies.getAllEndpoint)(())).toEventSteam.mergeWith(
+    firstBatch.events.mergeWith(
       FilterPanel.triggerFilters
         .flatMapMerge(filter =>
           callBackend(_.call(_.companies.searchEndpoint)(filter)).toEventSteam
@@ -36,7 +39,7 @@ object CompaniesPage:
 
   def apply() =
     sectionTag(
-//      onMountCallback(_ => performBackendCall()),
+      onMountCallback(_ => callBackend(_.call(_.companies.getAllEndpoint)(())).emitTo(firstBatch)),
       cls := "section-1",
       div(
         cls := "container company-list-hero",

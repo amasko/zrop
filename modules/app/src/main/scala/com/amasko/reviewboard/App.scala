@@ -9,7 +9,8 @@ import frontroute.LinkHandler
 object App {
 
   val app = div(
-    cls := "container",
+//    cls := "container",
+    onMountCallback(_ => core.Session.loadUserState()),
     Header(),
     Router()
   )
