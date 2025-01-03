@@ -7,13 +7,17 @@ import sttp.client3.*
 import sttp.tapir.client.sttp.SttpClientInterpreter
 import zio.*
 import sttp.client3.httpclient.zio.SttpClient
-import sttp.tapir.PublicEndpoint
+import sttp.tapir.{Endpoint, PublicEndpoint}
 
 trait BackendClient:
   def companies: CompanyEndpoints
   def users: UserEndpoints
 
   def call[I, O](endpointFn: BackendClient => PublicEndpoint[I, Throwable, O, Any])(
+      input: I
+  ): Task[O]
+
+  def callSecure[I, O](endpointFn: BackendClient => Endpoint[String, I, Throwable, O, Any])(
       input: I
   ): Task[O]
 
@@ -27,10 +31,6 @@ case class BackendClientLive(
   override val companies: CompanyEndpoints = new CompanyEndpoints {}
   override val users: UserEndpoints        = new UserEndpoints {}
 
-//  def call[I, O](e: PublicEndpoint[I, Throwable, O, Any], input: I): Task[O] =
-//    val req = interpreter.toRequestThrowDecodeFailures(e, Some(uri"${config.url}")).apply(input)
-//    be.send(req).map(_.body).absolve
-
   override def call[I, O](
       endpointFn: BackendClient => PublicEndpoint[I, Throwable, O, Any]
   )(input: I): Task[O] =
@@ -38,6 +38,19 @@ case class BackendClientLive(
       .toRequestThrowDecodeFailures(endpointFn(self), Some(uri"${config.url}"))
       .apply(input)
     be.send(req).map(_.body).absolve
+
+  override def callSecure[I, O](
+      endpointFn: BackendClient => Endpoint[String, I, Throwable, O, Any]
+  )(input: I): Task[O] =
+    for
+      t <- ZIO
+        .from(core.Session.getToken)
+        .orElseFail(new IllegalAccessException("Not logged in bitch!"))
+      req = interpreter
+        .toSecureRequestThrowDecodeFailures(endpointFn(self), Some(uri"${config.url}"))
+        .apply(t.token)(input)
+      res <- be.send(req).map(_.body).absolve
+    yield res
 
 object BackendClientLive:
   type Deps = BackendConfig & SttpClient & SttpClientInterpreter

@@ -18,7 +18,7 @@ trait FormState {
 
   def hasErrors: Boolean = errorList.exists(_.isDefined)
 
-  def maybeError: Option[String] = errorList.find(_.isDefined).flatten
+  private def maybeError: Option[String] = errorList.find(_.isDefined).flatten
 
   def maybeStatus: Option[Either[String, String]] =
     maybeError.map(Left(_)).orElse(maybeSuccess.map(Right(_))).filter(_ => showStatus)

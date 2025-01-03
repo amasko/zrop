@@ -9,22 +9,31 @@ import org.scalajs.dom
 import scala.scalajs.js.Date
 
 object Session:
+  val stateKey                          = "userState"
   val userState: Var[Option[UserToken]] = Var(Option.empty)
 
-  def isActive: Boolean = userState.now().nonEmpty
+  def isActive: Boolean =
+    loadUserState()
+    userState.now().nonEmpty
 
-  def setUserState(token: UserToken) = {
+  def setUserState(token: UserToken): Unit = {
     userState.set(Some(token))
-    Storage.set("userState", token)
+    Storage.set(stateKey, token)
 
   }
 
   def loadUserState(): Unit =
-//    Storage.get[UserToken]("userState").filter(t => t.expires <= new Date().getTime())
-    Storage.get[UserToken]("userState").filter(_.expires * 1000 <= Date.now())
-
+    Storage.get[UserToken](stateKey).filter(_.expires * 1000 <= Date.now())
     userState
       .set(
         Storage
-          .get[UserToken]("userState")
+          .get[UserToken](stateKey)
       )
+
+  def clearState(): Unit =
+    Storage.remove(stateKey)
+    userState.set(Option.empty)
+
+  def getToken: Option[UserToken] =
+    loadUserState()
+    userState.now()
