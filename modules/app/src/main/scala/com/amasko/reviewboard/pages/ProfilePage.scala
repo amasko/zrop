@@ -27,7 +27,7 @@ object ChangePasswordState:
   val empty: ChangePasswordState = ChangePasswordState("", "", "", false, None)
 
 object ProfilePage extends FormPage[ChangePasswordState]("Change password"):
-  override val stateVar: Var[ChangePasswordState] = Var(ChangePasswordState.empty)
+  override def initialState = ChangePasswordState.empty
 
   override def renderChildren(): List[ReactiveHtmlElement[html.Element]] =
     if core.Session.isActive then
@@ -42,7 +42,7 @@ object ProfilePage extends FormPage[ChangePasswordState]("Change password"):
         ),
         renderInput(
           "New Password",
-          "confirm-password-input",
+          "new-password-input",
           "password",
           true,
           "New password",

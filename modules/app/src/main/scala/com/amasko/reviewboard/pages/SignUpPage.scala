@@ -34,9 +34,7 @@ object SignupFormState:
   val empty: SignupFormState = SignupFormState("", "", "", None, false)
 
 object SignUpPage extends FormPage[SignupFormState](pageTitle = "Sign Up"):
-
-  override val stateVar: Var[SignupFormState] = Var(SignupFormState.empty)
-
+  override def initialState: SignupFormState = SignupFormState.empty
   override def renderChildren() = List(
     renderInput(
       "Email",
@@ -70,7 +68,6 @@ object SignUpPage extends FormPage[SignupFormState](pageTitle = "Sign Up"):
   )
 
   val submitter = Observer[SignupFormState] { s =>
-    //    dom.console.log("Current State: " + s) // todo temp debug
     if s.hasErrors then stateVar.update(_.copy(showStatus = true))
     else
       //      dom.console.log("Current State: " + s)
@@ -93,15 +90,3 @@ object SignUpPage extends FormPage[SignupFormState](pageTitle = "Sign Up"):
         )
         .runJs
   }
-
-//  def apply() =
-//    div(
-//      cls := "container-fluid",
-//      div(
-//        cls := "row",
-//        div(
-//          cls := "col-12",
-//          h1("Sign Up")
-//        )
-//      )
-//    )

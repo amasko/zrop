@@ -1,13 +1,13 @@
 package com.amasko.reviewboard
 package pages
 
+import components.Anchors
 import common.Constants
 import core.ZJS.*
-import http.requests.Login
 
+import http.requests.Login
 import com.raquo.laminar.api.L.{*, given}
 import frontroute.BrowserNavigation
-import org.scalajs.dom
 
 case class LoginFormState(
     email: String,
@@ -36,11 +36,9 @@ object LoginFormState {
 }
 
 object LoginPage extends FormPage[LoginFormState]("Log In"):
-
-  override val stateVar = Var(LoginFormState.empty)
+  override def initialState: LoginFormState = LoginFormState.empty
 
   val submitter = Observer[LoginFormState] { s =>
-//    dom.console.log("Current State: " + s) // todo temp debug
     if s.hasErrors then stateVar.update(_.copy(showStatus = true))
     else
 //      dom.console.log("Current State: " + s)
@@ -58,40 +56,6 @@ object LoginPage extends FormPage[LoginFormState]("Log In"):
         )
         .runJs
   }
-
-//  def apply() =
-//    div(
-//      cls := "row",
-//      div(
-//        cls := "col-md-5 p-0",
-//        div(
-//          cls := "logo",
-//          img(
-//            src := Constants.logoImg,
-//            alt := "JVM Logo"
-//          )
-//        )
-//      ),
-//      div(
-//        cls := "col-md-7",
-//        // right
-//        div(
-//          cls := "form-section",
-//          div(cls := "top-section", h1(span("Log In"))),
-//          children <-- stateVar.signal.map(s =>
-//            if s.showStatus then s.errors.map(renderError) else Nil
-//          ),
-//          renderSuccess(),
-//          form(
-//            nameAttr := "signin",
-//            cls      := "form",
-//            idAttr   := "form",
-//            // an input of type text
-//            renderChildren()
-//          )
-//        )
-//      )
-//    )
 
   override def renderChildren() = List(
     renderInput(
@@ -114,7 +78,8 @@ object LoginPage extends FormPage[LoginFormState]("Log In"):
       `type` := "button",
       pageTitle,
       onClick.preventDefault.mapTo(stateVar.now()) --> submitter
-    )
+    ),
+    Anchors.renderNavLink("Forgot password?", "/forgot", "nav-link jvm-item")
   )
 
 end LoginPage

@@ -13,11 +13,10 @@ object ZJS:
             .provide(BackendClientLive.configuredLayer)
         )
       }
-    // todo ????
 
     def runJs: Unit =
       Unsafe.unsafe { implicit unsafe =>
-        Runtime.default.unsafe.runToFuture(z.provide(BackendClientLive.configuredLayer))
+        Runtime.default.unsafe.fork(z.provide(BackendClientLive.configuredLayer))
       }
 
     def toEventSteam: EventStream[A] =

@@ -25,12 +25,15 @@ trait FormState {
 }
 
 abstract class FormPage[S <: FormState](val pageTitle: String):
+  def initialState: S
 
-  val stateVar: Var[S]
+  val stateVar: Var[S] = Var(initialState)
   def renderChildren(): List[ReactiveHtmlElement[dom.html.Element]]
 
   def apply() =
     div(
+//      onMountCallback(_ => core.Session.loadUserState()), maybe we need it on reload page?
+      onUnmountCallback(_ => stateVar.set(initialState)),
       cls := "row",
       div(
         cls := "col-md-5 p-0",

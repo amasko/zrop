@@ -14,8 +14,7 @@ case class LogoutState() extends FormState:
   override def showStatus: Boolean = false
 
 object LogoutPage extends FormPage[LogoutState]("Log out"):
-  override val stateVar: Var[LogoutState] = Var(LogoutState())
-
+  override def initialState = LogoutState()
   override def renderChildren(): List[ReactiveHtmlElement[html.Element]] = List(
     div(
       onMountCallback(_ => core.Session.clearState()),

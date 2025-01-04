@@ -4,7 +4,6 @@ package core
 import domain.data.UserToken
 import com.raquo.laminar.api.L.{*, given}
 import org.scalajs.dom
-//import scala.org.scalajs.js.*
 
 import scala.scalajs.js.Date
 
@@ -23,11 +22,11 @@ object Session:
   }
 
   def loadUserState(): Unit =
-    Storage.get[UserToken](stateKey).filter(_.expires * 1000 <= Date.now())
     userState
       .set(
         Storage
           .get[UserToken](stateKey)
+          .filterNot(_.expires * 1000 <= Date.now())
       )
 
   def clearState(): Unit =
