@@ -85,6 +85,7 @@ object RecoverPasswordPage extends FormPage[RecoverPasswordState]("Recover passw
                 showStatus = true,
                 upstreamStatus = Some(Right("You can log in now!"))
               )
+            )
           }
         )
         .runJs

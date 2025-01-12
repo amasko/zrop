@@ -4,8 +4,7 @@ package controllers
 
 import domain.data.UserID
 import zio.*
-import sttp.tapir.*
-import endpoints.{BaseEndpoint, UserEndpoints}
+import endpoints.UserEndpoints
 import services.UserService
 import services.JWTService
 import responses.UserResponse
