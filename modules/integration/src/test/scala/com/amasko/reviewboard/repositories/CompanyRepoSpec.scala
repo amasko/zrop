@@ -15,13 +15,13 @@ object CompanyRepoSpec extends ZIOSpecDefault:
   private def genString() = scala.util.Random.alphanumeric.take(10).mkString
 
   private def genCompany(): Company =
-    Company(0L, genString(), genString(), genString(), None, None, None, Nil)
+    Company(0L, genString(), genString(), genString(), None, None, None, None, Nil)
 
   def spec = suite("CompanyRepoSpec")(
     test("create company") {
       for
         repo <- ZIO.service[CompanyRepo]
-        c    <- repo.create(Company(0L, "slug", "name", "url", None, None, None, Nil))
+        c    <- repo.create(Company(0L, "slug", "name", "url", None, None, None, None, Nil))
         c1   <- repo.getById(c.id)
       yield assertTrue(c1.contains(c))
     },

@@ -23,17 +23,17 @@ case class JWTServiceLive private (jwtConfig: JWTConfig) extends JWTService:
     .require(algorithm)
     .withIssuer(issuer)
     .asInstanceOf[BaseVerification]
-    .build(java.time.Clock.systemUTC())
+//    .build(java.time.Clock.systemUTC())
+    .build()
 
-  def verifyToken(token: String): Task[UserID] = for
-    decoded <- ZIO.attempt(verifier.verify(token))
-    user <- ZIO.attempt(
+  def verifyToken(token: String): Task[UserID] =
+    ZIO.attempt {
+      val decoded = verifier.verify(token)
       UserID(
         decoded.getSubject.toLong,
         decoded.getClaim(username_claim).asString
       )
-    )
-  yield user
+    }
 
   def createToken(user: User): Task[UserToken] =
     for
@@ -49,7 +49,7 @@ case class JWTServiceLive private (jwtConfig: JWTConfig) extends JWTService:
           .withSubject(user.id.toString)
           .sign(algorithm)
       )
-    yield UserToken(user.email, jwt, expires.getEpochSecond)
+    yield UserToken(user.id, user.email, jwt, expires.getEpochSecond)
 
 object JWTServiceLive:
   val layer: URLayer[JWTConfig, JWTService] = ZLayer.fromFunction(JWTServiceLive.apply)

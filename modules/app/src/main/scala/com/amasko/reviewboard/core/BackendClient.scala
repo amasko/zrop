@@ -1,7 +1,7 @@
 package com.amasko.reviewboard
 package core
 
-import com.amasko.reviewboard.http.endpoints.{CompanyEndpoints, UserEndpoints}
+import http.endpoints.{CompanyEndpoints, ReviewEndpoints, UserEndpoints}
 import sttp.client3.impl.zio.FetchZioBackend
 import sttp.client3.*
 import sttp.tapir.client.sttp.SttpClientInterpreter
@@ -12,6 +12,7 @@ import sttp.tapir.{Endpoint, PublicEndpoint}
 trait BackendClient:
   def companies: CompanyEndpoints
   def users: UserEndpoints
+  def reviews: ReviewEndpoints
 
   def call[I, O](endpointFn: BackendClient => PublicEndpoint[I, Throwable, O, Any])(
       input: I
@@ -30,6 +31,7 @@ case class BackendClientLive(
 
   override val companies: CompanyEndpoints = new CompanyEndpoints {}
   override val users: UserEndpoints        = new UserEndpoints {}
+  override val reviews: ReviewEndpoints    = new ReviewEndpoints {}
 
   override def call[I, O](
       endpointFn: BackendClient => PublicEndpoint[I, Throwable, O, Any]

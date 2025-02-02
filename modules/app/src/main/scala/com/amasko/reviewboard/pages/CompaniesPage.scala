@@ -3,20 +3,14 @@ package pages
 
 import domain.data.Company
 import common.Constants
-import http.endpoints.CompanyEndpoints
 import com.raquo.laminar.api.L.{*, given}
-import org.scalajs.dom
 import components.Anchors
 import components.FilterPanel
 
-import sttp.client3.impl.zio.FetchZioBackend
-import sttp.client3.*
-import sttp.tapir.client.sttp.SttpClientInterpreter
 import zio.*
-import sttp.client3.httpclient.zio.SttpClient
-import sttp.tapir.PublicEndpoint
 
 import core.ZJS.*
+import components.CompanyComponents.*
 
 object CompaniesPage:
 
@@ -62,35 +56,6 @@ object CompaniesPage:
           )
         )
       )
-    )
-
-  private def renderPicture(c: Company) =
-    img(
-      cls := "img-fluid",
-      src := c.image.getOrElse(Constants.defaultCompanyLogo),
-      alt := c.name
-    )
-
-  private def locationString(c: Company) =
-    c.location
-      .map(l => s"$l, ${c.country.getOrElse("Unknown country")}")
-      .getOrElse("Unknown location")
-
-  private def renderDetail(icon: String, value: String) =
-    div(
-      cls := "company-detail",
-      i(cls := s"fa fa-$icon company-detail-icon"),
-      p(
-        cls := "company-detail-value",
-        value
-      )
-    )
-
-  private def renderOverview(c: Company) =
-    div(
-      cls := "company-summary",
-      renderDetail("location-dot", locationString(c)),
-      renderDetail("tags", c.tags.mkString(", "))
     )
 
   private def renderAction(c: Company) =

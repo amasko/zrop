@@ -1,8 +1,8 @@
 package com.amasko.reviewboard
 package repositories
 
-import com.amasko.reviewboard.domain.data.Company
-import zio.ULayer
+import com.amasko.reviewboard.domain.data.{Company, CompanyFilter}
+import zio.{Task, ULayer}
 
 class CompanyRepoMock(db: zio.Ref[Map[Long, Company]]) extends CompanyRepo:
   override def create(c: Company): zio.Task[Company] = db.modify { map =>
@@ -26,6 +26,9 @@ class CompanyRepoMock(db: zio.Ref[Map[Long, Company]]) extends CompanyRepo:
   override def getAll: zio.Task[List[Company]]                    = ???
   override def getBySlug(slug: String): zio.Task[Option[Company]] = ???
 
+  override def getCompanyAttributes: Task[CompanyFilter] = ???
+
+  override def search(filters: CompanyFilter): Task[List[Company]] = ???
 end CompanyRepoMock
 
 object CompanyRepoMock:

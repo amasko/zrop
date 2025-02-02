@@ -22,7 +22,7 @@ body {
 
 :root {
     --body-bg-color: #f6f6f6;
-    --background-color: #9000ce;
+    --background-color: #661289;
     --black: #000000;
     --white: #ffffff;
     --btn-focus: #07263a;
@@ -2920,7 +2920,6 @@ body a {
 
     border: none;
     padding: 0.75rem 3.125rem;
-    float: right;
 }
 
 .rock-action-btn:hover {
@@ -3870,7 +3869,6 @@ ul {
 
     border: none;
     padding: 0.75rem 3.125rem;
-    float: right;
 }
 
 @media (max-width: 767px) {
@@ -4458,7 +4456,6 @@ ul {
 
     border: none;
     padding: 0.5rem 3.125rem;
-    float: right;
 }
 
 .rock-action-btn:hover {

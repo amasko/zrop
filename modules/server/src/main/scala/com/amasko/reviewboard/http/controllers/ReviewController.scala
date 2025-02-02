@@ -36,7 +36,16 @@ class ReviewController private (service: ReviewService, jwt: JWTService)
       result.either
     }
 
-  val routes = List(createReview, getAllReviews, getReviewById)
+  val getReviewsByCompanyId = getByCompanyId
+    .serverLogic[Task] { id =>
+      val result = id.toLongOption match
+        case Some(id) => service.getByCompanyId(id)
+        case None     => ZIO.fail(new Exception("Invalid id"))
+
+      result.either
+    }
+
+  val routes = List(getReviewsByCompanyId, createReview, getAllReviews, getReviewById)
 
 object ReviewController:
   def makeZIO =

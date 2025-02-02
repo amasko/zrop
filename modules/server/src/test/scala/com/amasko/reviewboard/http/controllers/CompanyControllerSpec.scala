@@ -35,7 +35,7 @@ object CompanyControllerSpec extends ZIOSpecDefault {
 
   val jwtServiceStub = new JWTService {
     def createToken(user: User): Task[UserToken] = ZIO.succeed(
-      UserToken(user.email, "token", 999999999L)
+      UserToken(user.id, user.email, "token", 999999999L)
     )
 
     def verifyToken(token: String): Task[UserID] = ZIO.succeed(
@@ -52,7 +52,15 @@ object CompanyControllerSpec extends ZIOSpecDefault {
             .post(uri"/companies")
             .header("Authorization", "Bearer token")
             .body(
-              CreateCompanyRequest("Company Name", "nompanyname.com", None, None, None, Nil).toJson
+              CreateCompanyRequest(
+                "Company Name",
+                "nompanyname.com",
+                None,
+                None,
+                None,
+                None,
+                Nil
+              ).toJson
             )
 //            .response(asJson[CreateCompanyRequest])
             .send(b)
