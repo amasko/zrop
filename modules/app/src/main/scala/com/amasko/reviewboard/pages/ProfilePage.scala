@@ -84,7 +84,6 @@ object ProfilePage extends FormPage[ChangePasswordState]("Change password"):
         .mapBoth(
           { err =>
             stateVar.update(_.copy(showStatus = true, upstreamStatus = Some(Left(err.getMessage))))
-            err
           },
           { _ =>
             //            core.Session.setUserState(token)
@@ -96,6 +95,6 @@ object ProfilePage extends FormPage[ChangePasswordState]("Change password"):
             )
             //            BrowserNavigation.replaceState("/")
           }
-        )
+        ).merge
         .runJs
   }

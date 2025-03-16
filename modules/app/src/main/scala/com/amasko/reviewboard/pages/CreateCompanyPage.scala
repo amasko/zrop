@@ -177,7 +177,6 @@ object CreateCompanyPage extends FormPage[CreateCompanyState]("Post new company"
         .mapBoth(
           { err =>
             stateVar.update(_.copy(showStatus = true, upstreamStatus = Some(Left(err.getMessage))))
-            err
           },
           { _ =>
             stateVar.update(
@@ -187,6 +186,6 @@ object CreateCompanyPage extends FormPage[CreateCompanyState]("Post new company"
               )
             )
           }
-        )
+        ).merge
         .runJs
   }

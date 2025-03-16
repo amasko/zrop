@@ -53,7 +53,6 @@ object ForgotPasswordPage extends FormPage[ForgotPasswordState]("Forgot my passw
         .mapBoth(
           { err =>
             stateVar.update(_.copy(showStatus = true, upstreamStatus = Some(Left(err.getMessage))))
-            err
           },
           { _ =>
             stateVar.update(
@@ -63,6 +62,6 @@ object ForgotPasswordPage extends FormPage[ForgotPasswordState]("Forgot my passw
               )
             )
           }
-        )
+        ).merge
         .runJs
   }

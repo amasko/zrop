@@ -75,7 +75,6 @@ object SignUpPage extends FormPage[SignupFormState](pageTitle = "Sign Up"):
         .mapBoth(
           { err =>
             stateVar.update(_.copy(showStatus = true, upstreamStatus = Some(Left(err.getMessage))))
-            err
           },
           { _ =>
 //            core.Session.setUserState(token)
@@ -87,6 +86,6 @@ object SignUpPage extends FormPage[SignupFormState](pageTitle = "Sign Up"):
             )
 //            BrowserNavigation.replaceState("/")
           }
-        )
+        ).merge
         .runJs
   }

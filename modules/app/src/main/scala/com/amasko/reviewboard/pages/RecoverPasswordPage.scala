@@ -77,7 +77,6 @@ object RecoverPasswordPage extends FormPage[RecoverPasswordState]("Recover passw
         .mapBoth(
           { err =>
             stateVar.update(_.copy(showStatus = true, upstreamStatus = Some(Left(err.getMessage))))
-            err
           },
           { _ =>
             stateVar.update(
@@ -87,6 +86,6 @@ object RecoverPasswordPage extends FormPage[RecoverPasswordState]("Recover passw
               )
             )
           }
-        )
+        ).merge
         .runJs
   }

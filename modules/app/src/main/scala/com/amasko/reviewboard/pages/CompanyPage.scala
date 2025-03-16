@@ -26,19 +26,30 @@ object CompanyPage:
 
   val fetchCompanyBus = EventBus[Option[Company]]()
 
+  val triggerRefreshBus = EventBus[Unit]()
+
   val reviewSignal = fetchCompanyBus.events
     .flatMapSwitch {
       case None => EventStream.empty
 //    case Some(company) => EventStream.fromSeq(company.reviews)
-      case Some(company) =>
-        callBackend(_.call(_.reviews.getByCompanyId)(company.id.toString)).toEventSteam
+      case Some(company) => refreshReviewList(company.id.toString)
     }
-    .scanLeft(List.empty[Review])((acc, reviews) => acc ++ reviews) // todo temp check
+//    .scanLeft(List.empty[Review])((acc, reviews) => acc ++ reviews) // todo temp check
+    .scanLeft(List.empty[Review])((_, reviews) => reviews)
 
   val status = fetchCompanyBus.events.scanLeft(Status.Loading) {
     case (_, None)          => Status.NotFound
     case (_, Some(company)) => Status.Ok(company)
   }
+
+  private def refreshReviewList(companyId: String) =
+    val callBE = callBackend(_.call(_.reviews.getByCompanyId)(companyId)).toEventSteam
+    callBE
+      .mergeWith(
+        triggerRefreshBus.events.flatMapMerge(_ =>
+          callBE
+        )
+      )
 
   // render the company page
   def apply(companyId: Long) = {
@@ -79,7 +90,7 @@ object CompanyPage:
       cls := "container-fluid",
       renderCompanySummary,
       children <-- addReviewCardActive.signal.map { active =>
-        if active then List(AddReviewCard(company.id, () => addReviewCardActive.set(false)))
+        if active then List(AddReviewCard(company.id, triggerRefreshBus, () => addReviewCardActive.set(false)).run())
         else Nil
       },
 //        reviewCard(),

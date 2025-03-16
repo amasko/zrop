@@ -33,3 +33,14 @@ case class CreateReviewRequest(
 object CreateReviewRequest:
   import zio.json.{DeriveJsonCodec, JsonCodec}
   given JsonCodec[CreateReviewRequest] = DeriveJsonCodec.gen[CreateReviewRequest]
+
+  def fromReview(r: Review): CreateReviewRequest =
+    CreateReviewRequest(
+      r.companyId,
+      r.management,
+      r.culture,
+      r.salary,
+      r.benefits,
+      r.wouldRecommend,
+      r.review
+    )
