@@ -95,6 +95,7 @@ object ProfilePage extends FormPage[ChangePasswordState]("Change password"):
             )
             //            BrowserNavigation.replaceState("/")
           }
-        ).merge
+        )
+        .merge
         .runJs
   }

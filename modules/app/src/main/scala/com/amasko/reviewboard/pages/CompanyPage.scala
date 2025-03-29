@@ -1,9 +1,10 @@
 package com.amasko.reviewboard
 package pages
 
-import com.amasko.reviewboard.components.AddReviewCard
-import com.amasko.reviewboard.core.Session
-import com.amasko.reviewboard.domain.data.UserToken
+import com.raquo.laminar.DomApi
+import components.{AddReviewCard, Markdown, Time}
+import core.Session
+import domain.data.UserToken
 import common.Constants
 import http.endpoints.CompanyEndpoints
 import com.raquo.laminar.api.L.{*, given}
@@ -34,7 +35,6 @@ object CompanyPage:
 //    case Some(company) => EventStream.fromSeq(company.reviews)
       case Some(company) => refreshReviewList(company.id.toString)
     }
-//    .scanLeft(List.empty[Review])((acc, reviews) => acc ++ reviews) // todo temp check
     .scanLeft(List.empty[Review])((_, reviews) => reviews)
 
   val status = fetchCompanyBus.events.scanLeft(Status.Loading) {
@@ -46,9 +46,7 @@ object CompanyPage:
     val callBE = callBackend(_.call(_.reviews.getByCompanyId)(companyId)).toEventSteam
     callBE
       .mergeWith(
-        triggerRefreshBus.events.flatMapMerge(_ =>
-          callBE
-        )
+        triggerRefreshBus.events.flatMapMerge(_ => callBE)
       )
 
   // render the company page
@@ -90,7 +88,10 @@ object CompanyPage:
       cls := "container-fluid",
       renderCompanySummary,
       children <-- addReviewCardActive.signal.map { active =>
-        if active then List(AddReviewCard(company.id, triggerRefreshBus, () => addReviewCardActive.set(false)).run())
+        if active then
+          List(
+            AddReviewCard(company.id, triggerRefreshBus, () => addReviewCardActive.set(false)).run()
+          )
         else Nil
       },
 //        reviewCard(),
@@ -165,7 +166,9 @@ object CompanyPage:
       cls := "container",
       div(
         cls := "markdown-body overview-section",
-        // TODO add a highlight if this is "your" review
+        cls("review-highlighted") <-- Session.userState.signal.map(
+          _.exists(_.id == review.userId)
+        ), // written by the current user
         div(
           cls := "company-description",
           div(
@@ -177,11 +180,27 @@ object CompanyPage:
             renderReviewDetail("Benefits", review.benefits)
           ),
           // TODO parse this Markdown
+          injectMarkdown(review),
           div(
-            cls := "review-content",
-            review.review
+            cls := "review-posted",
+            s"Posted on ${Time.unixToHunanReadable(review.created.toEpochMilli)}"
           ),
-          div(cls := "review-posted", "Posted (TODO) a million years ago")
+//          child <-- Session.userState.signal.map { user =>
+//            if user.exists(_.id == review.userId) then
+//              button( // todo update actually does not work yet
+//                `type` := "button",
+//                cls    := "btn btn-warning rock-action-btn",
+//                "Edit review",
+//                onClick.preventDefault.mapTo(true) --> addReviewCardActive.writer
+//              )
+//            else
+//              div()
+//          }
+          child <-- Session.userState.signal.map { user =>
+            if user.exists(_.id == review.userId) then
+              div(cls := "review-posted", "You wrote this review")
+            else div()
+          }
         )
       )
     )
@@ -200,5 +219,15 @@ object CompanyPage:
         )
       )
     )
+
+  def injectMarkdown(review: Review) = {
+    val markdown = Markdown.toHtml(review.review)
+    div(
+      cls := "review-content",
+      foreignHtmlElement(
+        DomApi.unsafeParseHtmlString(markdown)
+      ) // todo: does not actually work as expected but its a shit
+    )
+  }
 
 end CompanyPage

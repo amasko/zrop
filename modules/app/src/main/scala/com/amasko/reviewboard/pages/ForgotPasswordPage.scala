@@ -62,6 +62,7 @@ object ForgotPasswordPage extends FormPage[ForgotPasswordState]("Forgot my passw
               )
             )
           }
-        ).merge
+        )
+        .merge
         .runJs
   }

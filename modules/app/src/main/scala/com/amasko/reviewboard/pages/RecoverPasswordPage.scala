@@ -86,6 +86,7 @@ object RecoverPasswordPage extends FormPage[RecoverPasswordState]("Recover passw
               )
             )
           }
-        ).merge
+        )
+        .merge
         .runJs
   }

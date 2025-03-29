@@ -19,11 +19,13 @@ class AddReviewCard(companyId: Long, triggerBus: EventBus[Unit], onDisable: () =
 
   val stateVar = Var(State.empty(0))
 
-  val submitter = Observer[State] { s =>
+  val submitter = Observer[State]: s =>
     if s.upstreamErrors.nonEmpty then stateVar.update(_.copy(showErrors = true))
     else
       //      dom.console.log("Current State: " + s)
-      val pp = callBackend(_.callSecure(_.reviews.createEndpoint)(CreateReviewRequest.fromReview(s.review)))
+      val pp = callBackend(
+        _.callSecure(_.reviews.createEndpoint)(CreateReviewRequest.fromReview(s.review))
+      )
         .mapBoth(
           { err =>
             stateVar.update(_.copy(showErrors = true, upstreamErrors = Some(err.getMessage)))
@@ -33,11 +35,10 @@ class AddReviewCard(companyId: Long, triggerBus: EventBus[Unit], onDisable: () =
             onDisable()
             //            BrowserNavigation.replaceState("/")
           }
-        ).merge
+        )
+        .merge
 
       pp.emitTo(triggerBus)
-  }
-
 
   def run() =
     stateVar.set(State.empty(companyId))
@@ -55,7 +56,7 @@ class AddReviewCard(companyId: Long, triggerBus: EventBus[Unit], onDisable: () =
               renderDropdown("Management", (r, v) => r.copy(management = v)),
               renderDropdown("Culture", (r, v) => r.copy(culture = v)),
               renderDropdown("Salary", (r, v) => r.copy(salary = v)),
-              renderDropdown("Benefits", (r, v) => r.copy(benefits = v)),
+              renderDropdown("Benefits", (r, v) => r.copy(benefits = v))
             ),
             // text area for the text review
             div(
@@ -65,7 +66,7 @@ class AddReviewCard(companyId: Long, triggerBus: EventBus[Unit], onDisable: () =
                 idAttr      := "add-review-text",
                 cls         := "add-review-text-input",
                 placeholder := "Write your review here",
-                onInput.mapToValue --> stateVar.updater { (s, value: String) =>
+                onInput.mapToValue --> stateVar.updater { (s: State, value: String) =>
                   s.copy(review = s.review.copy(review = value))
                 }
               )
@@ -82,37 +83,35 @@ class AddReviewCard(companyId: Long, triggerBus: EventBus[Unit], onDisable: () =
               "Cancel",
               onClick --> (_ => onDisable())
             ),
-            children <-- stateVar.signal.map { s =>
-              s.upstreamErrors.filter(_ => s.showErrors)
-            }.map(maybeRenderError).map(_.toList)
+            children <-- stateVar.signal
+              .map { s =>
+                s.upstreamErrors.filter(_ => s.showErrors)
+              }
+              .map(maybeRenderError)
+              .map(_.toList)
           )
         )
       )
     )
 
   private def maybeRenderError(error: Option[String]) =
-    error.map(err =>
-    div(cls := "page-status-errors", err))
+    error.map(err => div(cls := "page-status-errors", err))
 
   private def renderDropdown(name: String, updFn: (Review, Int) => Review) =
-    val selectorId = name.split(" ").mkString("-").toLowerCase() + "-selector"
+    val selectorId = name.split(" ").map(_.toLowerCase()).mkString("-")
     div(
       cls := "add-review-score",
       label(forId := selectorId, s"$name:"),
       select(
         idAttr := selectorId,
         (1 to 5).reverse.map { v =>
-          option(v.toString,
-            onInput.mapToValue --> stateVar.updater { (s, value: String) =>
-              s.copy(review = updFn(s.review, value.toInt))
-            }
-          )
-
-
-          // TODO set state here
+          option(v.toString)
+          // TODO set state here (mm??)
+        },
+        onInput.mapToValue --> stateVar.updater { (s: State, value: String) =>
+          s.copy(review = updFn(s.review, value.toInt))
         }
       )
     )
 
 end AddReviewCard
-

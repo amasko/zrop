@@ -186,6 +186,7 @@ object CreateCompanyPage extends FormPage[CreateCompanyState]("Post new company"
               )
             )
           }
-        ).merge
+        )
+        .merge
         .runJs
   }

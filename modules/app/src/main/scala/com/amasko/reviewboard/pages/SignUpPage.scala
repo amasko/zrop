@@ -86,6 +86,7 @@ object SignUpPage extends FormPage[SignupFormState](pageTitle = "Sign Up"):
             )
 //            BrowserNavigation.replaceState("/")
           }
-        ).merge
+        )
+        .merge
         .runJs
   }
