@@ -8,7 +8,7 @@ import domain.data.UserToken
 import common.Constants
 import http.endpoints.CompanyEndpoints
 import com.raquo.laminar.api.L.{*, given}
-//import org.scalajs.dom.*
+import org.scalajs.dom
 import zio.*
 import domain.data.{Company, Review}
 import components.CompanyComponents.*
@@ -224,9 +224,13 @@ object CompanyPage:
     val markdown = Markdown.toHtml(review.review)
     div(
       cls := "review-content",
-      foreignHtmlElement(
-        DomApi.unsafeParseHtmlString(markdown)
-      ) // todo: does not actually work as expected but its a shit
+      DomApi
+        .unsafeParseHtmlStringIntoNodeArray(markdown)
+        .map(_.asInstanceOf[dom.html.Element]) // unsafe, but we control the input
+        .toList
+        .map( // convert to Laminar elements
+          e => foreignHtmlElement(e)
+        )
     )
   }
 

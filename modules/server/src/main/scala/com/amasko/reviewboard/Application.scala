@@ -38,6 +38,7 @@ object Application extends ZIOAppDefault:
       ReviewServiceLive.layer,
       CompanyRepoLive.layer,
       ReviewRepoLive.layer,
+      InviteRepoLive.layer,
       Quill.Postgres.fromNamingStrategy(SnakeCase),
       Quill.DataSource.fromPrefix("db"),
       Configs.layer,
@@ -45,6 +46,7 @@ object Application extends ZIOAppDefault:
       UserRepoLive.layer,
       UserServiceLive.layer,
       EmailServiceLive.layer,
+      InviteServiceLive.layer,
       RecoveryTokensRepoLive.layer
     )
 

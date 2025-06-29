@@ -14,7 +14,8 @@ object HttpApi:
       companyController <- CompanyController.makeZIO
       reviewController  <- ReviewController.makeZIO
       userController    <- UserController.makeZIO
-    yield List(healthController, companyController, reviewController, userController)
+      invites           <- InviteController.makeZIO
+    yield List(healthController, companyController, reviewController, userController, invites)
 
   val routesZIO = makeControllers.map(gatherRouts).map { rts =>
     SwaggerInterpreter()

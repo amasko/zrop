@@ -2,8 +2,7 @@ package com.amasko.reviewboard
 package http
 package controllers
 
-import domain.data.{Company, UserID}
-import requests.CreateCompanyRequest
+import domain.data.UserID
 import services.{CompanyService, JWTService}
 
 import endpoints.CompanyEndpoints

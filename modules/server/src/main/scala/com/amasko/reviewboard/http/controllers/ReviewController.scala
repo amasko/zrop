@@ -3,7 +3,7 @@ package http
 package controllers
 
 import services.{JWTService, ReviewService}
-import domain.data.{Review, UserID}
+import domain.data.UserID
 import endpoints.ReviewEndpoints
 import zio.*
 

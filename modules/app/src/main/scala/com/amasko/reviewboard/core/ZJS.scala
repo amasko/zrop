@@ -7,7 +7,7 @@ import zio.*
 object ZJS:
   extension [E <: Throwable, A](z: ZIO[BackendClient, E, A])
     def emitTo(eventBus: EventBus[A]): Unit =
-      Unsafe.unsafe { implicit unsafe =>
+      Unsafe.unsafely {
         Runtime.default.unsafe.fork(
           z.tap(event => ZIO.attempt(eventBus.emit(event)))
             .provide(BackendClientLive.configuredLayer)
@@ -15,7 +15,7 @@ object ZJS:
       }
 
     def runJs: Unit =
-      Unsafe.unsafe { implicit unsafe =>
+      Unsafe.unsafely {
         Runtime.default.unsafe.fork(z.provide(BackendClientLive.configuredLayer))
       }
 
