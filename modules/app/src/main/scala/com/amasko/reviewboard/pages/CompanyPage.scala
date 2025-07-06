@@ -5,8 +5,6 @@ import com.raquo.laminar.DomApi
 import components.{AddReviewCard, Markdown, Time}
 import core.Session
 import domain.data.UserToken
-import common.Constants
-import http.endpoints.CompanyEndpoints
 import com.raquo.laminar.api.L.{*, given}
 import org.scalajs.dom
 import zio.*
@@ -43,10 +41,11 @@ object CompanyPage:
   }
 
   private def refreshReviewList(companyId: String) =
-    val callBE = callBackend(_.call(_.reviews.getByCompanyId)(companyId)).toEventSteam
-    callBE
+    val callBE = callBackend(_.call(_.reviews.getByCompanyId)(companyId))
+//      <* ZIO.logInfo(s"=> Get reviews for company: ${companyId}") // todo temp
+    callBE.toEventSteam
       .mergeWith(
-        triggerRefreshBus.events.flatMapMerge(_ => callBE)
+        triggerRefreshBus.events.flatMapMerge(_ => callBE.toEventSteam)
       )
 
   // render the company page
@@ -224,13 +223,19 @@ object CompanyPage:
     val markdown = Markdown.toHtml(review.review)
     div(
       cls := "review-content",
-      DomApi
-        .unsafeParseHtmlStringIntoNodeArray(markdown)
-        .map(_.asInstanceOf[dom.html.Element]) // unsafe, but we control the input
-        .toList
-        .map( // convert to Laminar elements
-          e => foreignHtmlElement(e)
-        )
+      DomApi.unsafeParseHtmlStringIntoNodeArray(markdown)
+        .map {
+          case t: dom.Text => span(t.data)
+          case e: dom.html.Element => foreignHtmlElement(e)
+          case _ => div("Unsupported element in Markdown")
+        }
+//       DomApi
+//        .unsafeParseHtmlStringIntoNodeArray(markdown)
+//        .map(_.asInstanceOf[dom.html.Element]) // unsafe, but we control the input
+//        .toList
+//        .map( // convert to Laminar elements
+//          e => foreignHtmlElement(e)
+//        )
     )
   }
 

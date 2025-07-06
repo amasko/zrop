@@ -4,6 +4,7 @@ package components
 import com.amasko.reviewboard.http.requests.CreateReviewRequest
 import com.raquo.laminar.api.L.{*, given}
 import domain.data.Review
+import org.scalajs.dom
 import core.ZJS.*
 
 class AddReviewCard(companyId: Long, triggerBus: EventBus[Unit], onDisable: () => Unit):
@@ -22,7 +23,7 @@ class AddReviewCard(companyId: Long, triggerBus: EventBus[Unit], onDisable: () =
   val submitter = Observer[State]: s =>
     if s.upstreamErrors.nonEmpty then stateVar.update(_.copy(showErrors = true))
     else
-      //      dom.console.log("Current State: " + s)
+      dom.console.log("=>> Current State: " + s) // todo temp
       val pp = callBackend(
         _.callSecure(_.reviews.createEndpoint)(CreateReviewRequest.fromReview(s.review))
       )
@@ -109,6 +110,7 @@ class AddReviewCard(companyId: Long, triggerBus: EventBus[Unit], onDisable: () =
           // TODO set state here (mm??)
         },
         onInput.mapToValue --> stateVar.updater { (s: State, value: String) =>
+          dom.console.log(s"Updating $name to $value") /// todo temp
           s.copy(review = updFn(s.review, value.toInt))
         }
       )

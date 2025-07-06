@@ -5,7 +5,15 @@ import scala.scalajs.js.annotation.*
 import scala.scalajs.js
 
 object Constants:
-  @JSImport("/static/img/fiery-lava 128x128.png", JSImport.Default)
+//  @js.native
+//  @JSImport("../../static/img/fiery-lava-128x128.png", JSImport.Default)
+//  val logoImg: String = js.native
+//
+//  @js.native
+//  @JSImport("../../static/img/generic_company.png", JSImport.Default)
+//  val defaultCompanyLogo: String = js.native
+
+  @JSImport("/static/img/fiery-lava-128x128.png", JSImport.Default) // todo why it does not work???
   @js.native
   val logoImg: String = js.native
 

@@ -9,7 +9,8 @@ object CompanyComponents:
   def renderPicture(c: Company) =
     img(
       cls := "img-fluid",
-      src := c.image.getOrElse(Constants.defaultCompanyLogo),
+//      src := c.image.getOrElse(Constants.defaultCompanyLogo),
+      src := "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
       alt := c.name
     )
 

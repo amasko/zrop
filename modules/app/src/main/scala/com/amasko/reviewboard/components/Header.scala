@@ -76,7 +76,8 @@ object Header {
       cls  := "navbar-brand",
       href := "/",
       img(
-        src := Constants.logoImg,
+//        src := Constants.logoImg, todo fix this shit!
+        src := "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
         alt := "JVM Logo",
         cls := "home-logo"
       )

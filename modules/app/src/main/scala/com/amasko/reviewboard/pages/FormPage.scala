@@ -40,7 +40,8 @@ abstract class FormPage[S <: FormState](val pageTitle: String):
         div(
           cls := "logo",
           img(
-            src := Constants.logoImg,
+//            src := Constants.logoImg,
+            src := "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
             alt := "JVM Logo"
           )
         )
