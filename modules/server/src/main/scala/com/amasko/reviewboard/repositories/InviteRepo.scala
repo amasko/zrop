@@ -11,6 +11,7 @@ trait InviteRepo:
   def getInvitePack(userName: String, companyId: Long): Task[Option[InviteRecord]]
   def addInvitePack(userName: String, companyId: Long, size: Int): Task[Long]
   def activatePack(id: Long): Task[Boolean]
+  def markInvites(userName: String, companyId: Long, nInvites: Int): Task[Int]
 
 case class InviteRepoLive(quill: Quill.Postgres[io.getquill.SnakeCase]) extends InviteRepo {
   import quill.*
@@ -52,6 +53,19 @@ case class InviteRepoLive(quill: Quill.Postgres[io.getquill.SnakeCase]) extends 
       query[InviteRecord]
         .filter(i => i.userName == lift(userName) && i.companyId == lift(companyId) && i.active)
     }.map(_.headOption)
+
+  private inline def calc = quote { (current: Int, substact: Int) =>
+//    if current > newOne then current - newOne else 0
+    current - substact
+  }
+
+  override def markInvites(userName: String, companyId: Long, nInvites: Int): Task[Int] =
+    run {
+      query[InviteRecord]
+        .filter(i => i.userName == lift(userName) && i.companyId == lift(companyId) && i.active)
+        .update(ir => ir.nInvites -> calc(ir.nInvites, lift(nInvites)))
+        .returning(_.nInvites)
+    }.map(r => if r > 0 then nInvites else r + nInvites)
 
 }
 
