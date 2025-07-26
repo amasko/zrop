@@ -8,7 +8,7 @@ import zio.*
 class HealthController extends BaseController with HealthEndpoint:
 
   val health = healthEndpoint
-    .serverLogic[Task](_ => ZIO.succeed("OK").map(Right(_)))
+    .serverLogic[Task](_ => ZIO.succeed(Right("OK")))
 
   val routes = List(health)
 

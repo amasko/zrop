@@ -10,18 +10,27 @@ case class RootConf(
     jwt: JWTConfig,
     recoveryTokens: RecoveryTokensConfig,
     email: EmailConfig,
-    invites: InvitePackConfig
+    invites: InvitePackConfig,
+    payment: PaymentConfig
 )
 
 case class JWTConfig(secret: String, ttl: Long)
 case class RecoveryTokensConfig(ttl: Long)
 case class EmailConfig(host: String, port: Int, user: String, password: String)
 case class InvitePackConfig(n: Int)
+case class PaymentConfig(
+    successUrl: String,
+    cancelUrl: String,
+    price: String,
+    key: String,
+    secret: String
+)
 
 object Configs:
   private val config = deriveConfig[RootConf].mapKey(toKebabCase)
 
-  type Configuration = JWTConfig & RecoveryTokensConfig & EmailConfig & InvitePackConfig
+  type Configuration = JWTConfig & RecoveryTokensConfig & EmailConfig & InvitePackConfig &
+    PaymentConfig
 
 //  def getConfig[A: DeriveConfig]: IO[Config.Error, A] = TypesafeConfigProvider.fromResourcePath().load(deriveConfig[A].mapKey(toKebabCase))
 
@@ -30,7 +39,6 @@ object Configs:
   )
 
   val layer: Layer[Config.Error, Configuration] =
-    getLayer(_.jwt) ++ getLayer(_.recoveryTokens) ++ getLayer(_.email) ++ getLayer(_.invites)
-//    ZLayer(
-//     ZIO.config[JWTConfig](config.map(_.jwt))
-//  )
+    getLayer(_.jwt) ++ getLayer(_.recoveryTokens) ++ getLayer(_.email) ++ getLayer(
+      _.invites
+    ) ++ getLayer(_.payment)

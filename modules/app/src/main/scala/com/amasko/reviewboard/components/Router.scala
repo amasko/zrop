@@ -8,8 +8,16 @@ import frontroute.*
 import pages.*
 
 object Router {
+  val externalUrlBus = EventBus[String]()
+
   def apply() =
     mainTag(
+      onMountCallback(ctx =>
+        // Load user state on mount
+        externalUrlBus.events.foreach { url =>
+          dom.window.location.href = url
+        }(using ctx.owner)
+      ),
       routes(
         div(
           cls := "container-fluid",
@@ -24,6 +32,9 @@ object Router {
           },
           path("logout") {
             LogoutPage()
+          },
+          path("changepassword") {
+            ChangePasswordPage()
           },
           path("profile") {
             ProfilePage()

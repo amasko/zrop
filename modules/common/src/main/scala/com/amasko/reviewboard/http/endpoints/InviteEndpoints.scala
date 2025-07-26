@@ -40,3 +40,26 @@ trait InviteEndpoints extends BaseEndpoint:
         .get
         .out(jsonBody[List[InviteNameRecord]])
 
+    val addInvitePackPromotedEndpoint =
+      secureBaseEndpoint
+        .tag("Invites (promoted)")
+        .name("add invites (promoted)")
+        .description("get invite tokens (promoted)")
+        .in("invite" / "promoted")
+        .post
+        .in(jsonBody[InvitePackRequest])
+        .out(stringBody) // stripe url
+      
+    val webhookEndpoint =
+      baseEndpoint
+        .tag("Invites")
+        .name("webhook")
+        .description("stripe webhook for invite packs")
+        .in("invite" / "webhook")
+        .post
+        .in(header[String]("Stripe-Signature"))
+        .in(jsonBody[String]) // raw body
+        .out(emptyOutput) // response message
+
+
+end InviteEndpoints

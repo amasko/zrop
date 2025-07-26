@@ -1,8 +1,9 @@
 package com.amasko.reviewboard
 package pages
 
+import com.amasko.reviewboard.http.responses.InvitePackRequest
 import com.raquo.laminar.DomApi
-import components.{AddReviewCard, Markdown, Time}
+import components.{AddReviewCard, Markdown, Router, Time}
 import core.Session
 import domain.data.UserToken
 import com.raquo.laminar.api.L.{*, given}
@@ -10,7 +11,6 @@ import org.scalajs.dom
 import zio.*
 import domain.data.{Company, Review}
 import components.CompanyComponents.*
-
 import core.ZJS.*
 
 object CompanyPage:
@@ -40,6 +40,8 @@ object CompanyPage:
     case (_, Some(company)) => Status.Ok(company)
   }
 
+  val inviteErrorBus = EventBus[String]()
+
   private def refreshReviewList(companyId: String) =
     val callBE = callBackend(_.call(_.reviews.getByCompanyId)(companyId))
 //      <* ZIO.logInfo(s"=> Get reviews for company: ${companyId}") // todo temp
@@ -47,6 +49,13 @@ object CompanyPage:
       .mergeWith(
         triggerRefreshBus.events.flatMapMerge(_ => callBE.toEventSteam)
       )
+
+  def startPaymentFlow(companyId: String) =
+    callBackend(
+      _.callSecure(_.invites.addInvitePackPromotedEndpoint)(InvitePackRequest(companyId.toLong))
+    )
+      .tapError(e => ZIO.attempt(inviteErrorBus.emit(e.getMessage)))
+      .emitTo(Router.externalUrlBus)
 
   // render the company page
   def apply(companyId: Long) = {
@@ -95,33 +104,54 @@ object CompanyPage:
       },
 //        reviewCard(),
       children <-- reviewSignal.map(reviews => reviews.map(renderStaticReview)),
+      child.maybe <-- Session.userState.signal.map { user =>
+        if user.nonEmpty then Some(renderInviteAction(company))
+        else None
+      }
+    )
+  )
+//  def renderPicture(company: Company) =
+//      company.logo match
+//      case Some(logo) =>
+//          img(
+//          cls := "jvm-companies-details-card-profile-img-logo",
+//          src := logo,
+//          alt := s"${company.name} logo"
+//          )
+//      case None => div(cls := "jvm-companies-details-card-profile-img-placeholder", "No Logo")
+
+  private def renderInviteAction(company: Company) =
+    div(
+      cls := "container",
       div(
-        cls := "container",
+        cls := "rok-last",
         div(
-          cls := "rok-last",
+          cls := "row invite-row",
           div(
-            cls := "row invite-row",
-            div(
-              cls := "col-md-6 col-sm-6 col-6",
-              span(
-                cls := "rock-apply",
-                p("Do you represent this company?"),
-                p("Invite people to leave reviews.")
-              )
-            ),
-            div(
-              cls := "col-md-6 col-sm-6 col-6",
-              a(
-                href   := company.url,
-                target := "blank",
-                button(`type` := "button", cls := "rock-action-btn", "Invite people")
-              )
+            cls := "col-md-6 col-sm-6 col-6",
+            span(
+              cls := "rock-apply",
+              p("Do you represent this company?"),
+              p("Invite people to leave reviews.")
             )
+          ),
+          div(
+            cls := "col-md-6 col-sm-6 col-6",
+            button(
+              `type` := "button",
+              cls    := "rock-action-btn",
+              "Invite people",
+              disabled <-- inviteErrorBus.events.mapTo(true).startWith(false),
+              onClick.mapToUnit --> (_ => startPaymentFlow(company.id.toString))
+            )
+          ),
+          div(
+            cls := "col-md-12 col-sm-12 col-12",
+            child.text <-- inviteErrorBus.events.map(error => s"Error: $error")
           )
         )
       )
     )
-  )
 
   def maybeRenderUserAction(user: Option[UserToken], reviewSig: Signal[List[Review]]) =
     user match
@@ -223,11 +253,12 @@ object CompanyPage:
     val markdown = Markdown.toHtml(review.review)
     div(
       cls := "review-content",
-      DomApi.unsafeParseHtmlStringIntoNodeArray(markdown)
+      DomApi
+        .unsafeParseHtmlStringIntoNodeArray(markdown)
         .map {
-          case t: dom.Text => span(t.data)
+          case t: dom.Text         => span(t.data)
           case e: dom.html.Element => foreignHtmlElement(e)
-          case _ => div("Unsupported element in Markdown")
+          case _                   => div("Unsupported element in Markdown")
         }
 //       DomApi
 //        .unsafeParseHtmlStringIntoNodeArray(markdown)

@@ -65,7 +65,7 @@ object Header {
       renderNavLink("Companies", "/companies")
     ) ++ variableLinks
 
-  private def renderNavLink(text: String, location: String) =
+  def renderNavLink(text: String, location: String) =
     li(
       cls := "nav-item",
       Anchors.renderNavLink(text, location, "nav-link jvm-item")

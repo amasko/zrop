@@ -1,7 +1,7 @@
 package com.amasko.reviewboard
 
 import repositories.*
-import services.*
+import services.{PaymentService, *}
 import http.HttpApi
 import config.Configs
 import zio.*
@@ -39,6 +39,7 @@ object Application extends ZIOAppDefault:
       CompanyRepoLive.layer,
       ReviewRepoLive.layer,
       InviteRepoLive.layer,
+      PaymentServiceLive.layer,
       Quill.Postgres.fromNamingStrategy(SnakeCase),
       Quill.DataSource.fromPrefix("db"),
       Configs.layer,

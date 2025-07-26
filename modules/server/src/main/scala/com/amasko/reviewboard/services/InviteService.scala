@@ -22,7 +22,9 @@ final case class InviteServiceLive(
 
   override def sendInvites(userName: String, companyId: Long, receivers: List[String]): Task[Int] =
     for {
-      company <- companyRepo.getById(companyId).someOrFail(new NoSuchElementException(s"Company with id $companyId not found"))
+      company <- companyRepo
+        .getById(companyId)
+        .someOrFail(new NoSuchElementException(s"Company with id $companyId not found"))
       invitesMarked <- repo.markInvites(userName, companyId, receivers.size)
       _ <- ZIO
         .foreachParDiscard(receivers.take(invitesMarked)) { receiver =>
@@ -45,8 +47,10 @@ final case class InviteServiceLive(
             )
           )
         case None => repo.addInvitePack(userName, companyId, conf.n)
-      _ <- repo.activatePack(id) /// todo remove later
+//      _ <- repo.activatePack(id) /// todo remove later
     yield id
+
+end InviteServiceLive
 
 object InviteServiceLive:
   val layer

@@ -3,13 +3,13 @@ package http
 package controllers
 
 import com.amasko.reviewboard.domain.data.UserID
-import com.amasko.reviewboard.services.{InviteService, JWTService}
+import com.amasko.reviewboard.services.{InviteService, JWTService, PaymentService}
 import zio.*
 import responses.InviteResponse
 import zio.json.*
 import endpoints.InviteEndpoints
 
-class InviteController(jwt: JWTService, service: InviteService)
+class InviteController(jwt: JWTService, service: InviteService, paymentService: PaymentService)
     extends BaseController
     with InviteEndpoints
     with SecureEndpoint(jwt):
@@ -43,11 +43,35 @@ class InviteController(jwt: JWTService, service: InviteService)
       service.getByUserId(user.email).either
     }
 
-  override val routes = List(addPack, invite, getByUserId)
+  val addPackPromoted = addInvitePackPromotedEndpoint
+    .serverSecurityLogic[UserID, Task](
+      verify
+    )
+    .serverLogic { user => request =>
+      val result =
+        for
+          createdPackId <- service.addInvitePack(user.email, request.companyId)
+          session <- paymentService
+            .createCheckoutSession(createdPackId, user.email)
+            .someOrFail(new RuntimeException("Failed to create checkout session"))
+        yield session.getUrl
+
+      result.either
+    }
+
+  val webhook = webhookEndpoint
+    .serverLogic[Task] { (signature, payload) =>
+      paymentService.handleWebhook(signature, payload).unit.either
+    }
+
+  override val routes = List(addPack, invite, getByUserId, addPackPromoted, webhook)
+
+end InviteController
 
 object InviteController:
   def makeZIO =
     for
       jwt     <- ZIO.service[JWTService]
       service <- ZIO.service[InviteService]
-    yield new InviteController(jwt, service)
+      payment <- ZIO.service[PaymentService]
+    yield new InviteController(jwt, service, payment)

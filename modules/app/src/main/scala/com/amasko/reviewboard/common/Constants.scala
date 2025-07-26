@@ -13,12 +13,12 @@ object Constants:
 //  @JSImport("../../static/img/generic_company.png", JSImport.Default)
 //  val defaultCompanyLogo: String = js.native
 
-  @JSImport("/static/img/fiery-lava-128x128.png", JSImport.Default) // todo why it does not work???
   @js.native
+  @JSImport("/static/img/fiery-lava-128x128.png", JSImport.Default) // todo why it does not work???
   val logoImg: String = js.native
 
-  @JSImport("/static/img/generic_company.png", JSImport.Default)
   @js.native
+  @JSImport("/static/img/generic_company.png", JSImport.Default)
   val defaultCompanyLogo: String = js.native
 
   val emailRegex =

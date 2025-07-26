@@ -2,7 +2,8 @@ package com.amasko.reviewboard
 package http
 package controllers
 
-import domain.data.UserID
+import com.amasko.reviewboard.http.requests.Login
+import domain.data.{UserID, UserToken}
 import zio.*
 import endpoints.UserEndpoints
 import services.UserService

@@ -6,3 +6,8 @@
 .add-review-cancel {
     margin-left: 10px;
 }
+
+.profile-section {
+    align-self: flex-start;
+    margin: 2rem 0;
+}
