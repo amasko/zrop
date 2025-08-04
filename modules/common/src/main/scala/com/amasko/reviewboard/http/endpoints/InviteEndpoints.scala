@@ -58,7 +58,7 @@ trait InviteEndpoints extends BaseEndpoint:
         .in("invite" / "webhook")
         .post
         .in(header[String]("Stripe-Signature"))
-        .in(jsonBody[String]) // raw body
+        .in(stringBody) // raw body
         .out(emptyOutput) // response message
 
 

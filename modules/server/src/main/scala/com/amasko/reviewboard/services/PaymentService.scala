@@ -13,8 +13,8 @@ trait PaymentService:
   def createCheckoutSession(packId: Long, userName: String): Task[Option[Session]]
 
   def handleWebhook(
-      payload: String,
-      signature: String
+      signature: String, // TODO: use typed objects/opaque types
+      payload: String
   ): Task[Boolean]
 
 case class PaymentServiceLive(stripeConf: PaymentConfig, inviteRepo: InviteRepo)
@@ -55,8 +55,8 @@ case class PaymentServiceLive(stripeConf: PaymentConfig, inviteRepo: InviteRepo)
       .option
 
   override def handleWebhook(
-      payload: String,
-      signature: String
+      signature: String,
+      payload: String
   ): Task[Boolean] = // todo generalize on return type
     val result = for
       event <- ZIO.attempt(
@@ -67,17 +67,31 @@ case class PaymentServiceLive(stripeConf: PaymentConfig, inviteRepo: InviteRepo)
         case "checkout.session.completed" =>
           ZIO
             .attempt {
-              val session = event.getDataObjectDeserializer.getObject.toScala.map(
-                _.asInstanceOf[com.stripe.model.checkout.Session]
-              ) // wtf?
-              val packId = session.map(_.getClientReferenceId.toLong)
-              packId
+//              val session = event.getDataObjectDeserializer.getObject.toScala.map(
+//                _.asInstanceOf[com.stripe.model.checkout.Session]
+//              ) // wtf?
+              val ev = event.getDataObjectDeserializer
+              val stripeObject =
+                if (ev.getObject.isPresent) ev.getObject.get
+                else
+                  throw new RuntimeException(
+                    "Stripe event data object is not present"
+                  )
+              stripeObject.asInstanceOf[com.stripe.model.checkout.Session]
             }
-            .someOrFail(new RuntimeException("Failed to extract session from event"))
-        // process other session events if needed
-        case _ => ZIO.fail(new RuntimeException(s"Unhandled event type: ${event.getType}"))
-      _           <- ZIO.logInfo(s"Activating Pack ${pack}")
-      isActivated <- inviteRepo.activatePack(pack)
+            .flatMap { session =>
+              ZIO
+                .attempt(session.getClientReferenceId.toLong)
+                .logError(
+                  s"Failed to parse client reference ID from session ${session.getClientReferenceId}"
+                )
+                .asSome
+            }
+        case _ => ZIO.logWarning(s"Unhandled event type: ${event.getType}").as(None)
+      _ <- ZIO.logInfo(s"Activating Pack ${pack}")
+      isActivated <- pack match
+        case Some(id) => inviteRepo.activatePack(id)
+        case None     => ZIO.succeed(false)
     yield isActivated
 
     result

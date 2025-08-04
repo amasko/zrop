@@ -34,7 +34,7 @@ class InviteController(jwt: JWTService, service: InviteService, paymentService: 
           "Invites sent successfully or not really",
           sent
         )
-      result.either
+      result.logError("Sending failed.").either
     }
 
   val getByUserId = getByUserIdEndpoint
@@ -61,7 +61,7 @@ class InviteController(jwt: JWTService, service: InviteService, paymentService: 
 
   val webhook = webhookEndpoint
     .serverLogic[Task] { (signature, payload) =>
-      paymentService.handleWebhook(signature, payload).unit.either
+        paymentService.handleWebhook(signature, payload).unit.either
     }
 
   override val routes = List(addPack, invite, getByUserId, addPackPromoted, webhook)

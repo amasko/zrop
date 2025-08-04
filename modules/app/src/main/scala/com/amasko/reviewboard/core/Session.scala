@@ -21,13 +21,17 @@ object Session:
 
   }
 
-  def loadUserState(): Unit =
-    userState
-      .set(
-        Storage
-          .get[UserToken](stateKey)
-          .filterNot(_.expires * 1000 <= Date.now())
-      )
+  def loadUserState(): Unit = {
+    val storedState = Storage.get[UserToken](stateKey)
+    val relevant    = storedState.filterNot(_.expires * 1000 <= Date.now())
+
+    if relevant.isEmpty && storedState.nonEmpty then Storage.remove(stateKey)
+    else if relevant.isDefined && userState.now() != relevant then userState.set(relevant)
+
+//    if userState.now() != relevant then
+//      userState.set(relevant)
+    else ()
+  }
 
   def clearState(): Unit =
     Storage.remove(stateKey)

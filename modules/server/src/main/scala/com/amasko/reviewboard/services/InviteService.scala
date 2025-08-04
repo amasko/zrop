@@ -47,7 +47,6 @@ final case class InviteServiceLive(
             )
           )
         case None => repo.addInvitePack(userName, companyId, conf.n)
-//      _ <- repo.activatePack(id) /// todo remove later
     yield id
 
 end InviteServiceLive

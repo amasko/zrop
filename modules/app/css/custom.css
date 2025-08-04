@@ -9,5 +9,21 @@
 
 .profile-section {
     align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
     margin: 2rem 0;
+}
+
+.invites-area {
+    display: block;
+    width: 100%;
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
 }

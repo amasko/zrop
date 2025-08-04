@@ -1,14 +1,14 @@
 package com.amasko.reviewboard
 package pages
 
-import components.Header
+import components.{Anchors, InviteActions}
 import core.Session
-import http.requests.UpdatePassword
 import common.Constants
 import com.raquo.laminar.api.L.{*, given}
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 import org.scalajs.dom.html
 import core.ZJS.*
+import org.scalajs.dom
 
 object ProfilePage:
   def apply() =
@@ -32,6 +32,7 @@ object ProfilePage:
         div(
           cls := "form-section",
           child <-- Session.userState.signal.map(user =>
+//            dom.console.log(s"User state: $user") // Debugging line
             if user.isEmpty then renderInvalid()
             else renderContent()
           )
@@ -48,8 +49,9 @@ object ProfilePage:
 
   private def renderContent() =
     div(
-      cls := "top-section",
+//      clls := "top-section",
       h1(span("Profile")),
       p("You can change your password here."),
-      Header.renderNavLink("Change password", "/changepassword")
+      Anchors.renderNavLink("Change password", "/changepassword"),
+      InviteActions()
     )

@@ -111,7 +111,7 @@ case class EmailServiceLive private (conf: EmailConfig) extends EmailService:
               <p>
                 You have been invited to review the company <strong>${company.name}</strong>.
                 <br />
-                Go to <a href="http://localhost:1234/companies/${company.id}"</a> to see the details.
+                Go to <a href="http://localhost:1234/company/${company.id}"</a> to see the details.
               </p>
             </body>
           </div>
@@ -138,8 +138,8 @@ object EmailServiceDemo extends ZIOAppDefault:
       EmailConfig(
         host = "smtp.ethereal.email",
         port = 587,
-        user = "kelley.pacocha@ethereal.email",
-        password = "N1W3zR3YmqcW2QR97q"
+        user = "stone67@ethereal.email",
+        password = "GWCRUKqzSeUwrasVE3"
       )
     ),
     EmailServiceLive.layer
